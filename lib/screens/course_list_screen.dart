@@ -14,7 +14,7 @@ class CourseListScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          'Courses',
+          'Folders',
           style: TextStyle(
             fontSize: 32,
             fontWeight: FontWeight.bold,
@@ -32,7 +32,7 @@ actions: [
           showDialog(
             context: context,
             builder: (context) => AlertDialog(
-              title: const Text('Sort Courses By'),
+              title: const Text('Sort Folders By'),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [

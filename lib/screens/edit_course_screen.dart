@@ -48,7 +48,7 @@ class _EditCourseScreenState extends State<EditCourseScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.course == null ? 'New Course' : 'Edit Course'),
+        title: Text(widget.course == null ? 'New Folder' : 'Edit Folder'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.of(context).pop(),
@@ -60,7 +60,7 @@ class _EditCourseScreenState extends State<EditCourseScreen> {
           key: _formKey,
           child: Column(
             children: [
-              // Course Icon with Emoji
+              // Folder Icon with Emoji
               GestureDetector(
                 onTap: _showEmojiPicker,
                 child: Container(
@@ -95,27 +95,27 @@ class _EditCourseScreenState extends State<EditCourseScreen> {
               ),
               const SizedBox(height: 16),
               
-              // Course Name Field
+              // Folder Name Field
               TextFormField(
                 controller: _nameController,
                 decoration: const InputDecoration(
-                  labelText: 'Course',
+                  labelText: 'Folder',
                   border: OutlineInputBorder(),
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter course name';
+                    return 'Please enter folder name';
                   }
                   return null;
                 },
               ),
               const SizedBox(height: 16),
               
-              // Instructor Field
+              // Description Field
               TextFormField(
                 controller: _instructorController,
                 decoration: const InputDecoration(
-                  labelText: 'Instructor',
+                  labelText: 'Description',
                   border: OutlineInputBorder(),
                 ),
               ),
