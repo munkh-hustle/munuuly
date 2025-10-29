@@ -98,4 +98,46 @@ void updateLinkInCourse(String courseId, String linkId, String newTitle, String 
     updateCourse(courseId, updatedCourse);
   }
 }
+// Add these methods to CourseProvider class in course_provider.dart
+
+void addInfoItemToCourse(String courseId, InfoItem infoItem) {
+  final course = getCourseById(courseId);
+  if (course != null) {
+    final updatedCourse = course.copyWith(
+      infoItems: [...course.infoItems, infoItem],
+      lastEdited: DateTime.now(),
+    );
+    updateCourse(courseId, updatedCourse);
+  }
+}
+
+void updateInfoItemInCourse(String courseId, String infoItemId, InfoItem updatedInfoItem) {
+  final course = getCourseById(courseId);
+  if (course != null) {
+    final updatedInfoItems = course.infoItems.map((item) {
+      if (item.id == infoItemId) {
+        return updatedInfoItem;
+      }
+      return item;
+    }).toList();
+    
+    final updatedCourse = course.copyWith(
+      infoItems: updatedInfoItems,
+      lastEdited: DateTime.now(),
+    );
+    updateCourse(courseId, updatedCourse);
+  }
+}
+
+void removeInfoItemFromCourse(String courseId, String infoItemId) {
+  final course = getCourseById(courseId);
+  if (course != null) {
+    final updatedInfoItems = course.infoItems.where((item) => item.id != infoItemId).toList();
+    final updatedCourse = course.copyWith(
+      infoItems: updatedInfoItems,
+      lastEdited: DateTime.now(),
+    );
+    updateCourse(courseId, updatedCourse);
+  }
+}
 }
