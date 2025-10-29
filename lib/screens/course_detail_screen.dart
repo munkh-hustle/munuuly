@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/course_provider.dart';
 import '../widgets/add_link_modal.dart';
-import '../widgets/link_item.dart'; // ADD THIS IMPORT
-import '../models/course.dart'; // ADD THIS IMPORT
-import '../models/link.dart'; // ADD THIS IMPORT
+import '../widgets/link_item.dart';
+import '../models/course.dart';
+import '../models/link.dart';
 import 'edit_course_screen.dart';
 
 class CourseDetailScreen extends StatefulWidget {
@@ -107,10 +107,10 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> with SingleTick
       padding: const EdgeInsets.all(16.0),
       child: Column(
         children: [
-          // Course Icon/Image Upload
+          // Course Icon with Emoji
           GestureDetector(
             onTap: () {
-              // TODO: Implement image upload
+              // TODO: Implement image upload or emoji change
             },
             child: Container(
               width: 80,
@@ -120,9 +120,12 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> with SingleTick
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(color: Colors.grey.shade300),
               ),
-              child: course.customIcon != null
-                  ? Image.network(course.customIcon!)
-                  : Icon(Icons.camera_alt, color: Colors.grey.shade400),
+              child: Center(
+                child: Text(
+                  course.customIcon ?? '📚', // Use stored emoji or default
+                  style: const TextStyle(fontSize: 32),
+                ),
+              ),
             ),
           ),
           const SizedBox(height: 16),
@@ -211,15 +214,33 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> with SingleTick
   Widget _buildStudySetsTab() => const Center(child: Text('Study Sets Content'));
 
   Color _getColorFromString(String colorString) {
-    switch (colorString) {
-      case 'pink': return Colors.pink;
-      case 'blue': return Colors.blue;
-      case 'green': return Colors.green;
-      case 'purple': return Colors.purple;
-      case 'orange': return Colors.orange;
-      default: return Colors.grey;
-    }
+  // Handle both named colors and Color objects
+  if (colorString.startsWith('Color(0xff')) {
+    // Extract hex value from Color object string
+    final hexString = colorString.substring(10, colorString.length - 1);
+    final colorValue = int.parse(hexString, radix: 16);
+    return Color(colorValue);
   }
+  
+  // Handle named colors
+  switch (colorString) {
+    case 'pink': return Colors.pink;
+    case 'blue': return Colors.blue;
+    case 'green': return Colors.green;
+    case 'purple': return Colors.purple;
+    case 'orange': return Colors.orange;
+    case 'red': return Colors.red;
+    case 'teal': return Colors.teal;
+    case 'indigo': return Colors.indigo;
+    default: 
+      // Try to parse as hex if it's not a named color
+      try {
+        return Color(int.parse(colorString.replaceFirst('0x', ''), radix: 16));
+      } catch (e) {
+        return Colors.grey;
+      }
+  }
+}
 }
 
 class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {

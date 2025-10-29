@@ -1,11 +1,38 @@
+// course_provider.dart
 import 'package:flutter/foundation.dart';
 import '../models/course.dart';
 import '../models/link.dart';
 
 class CourseProvider with ChangeNotifier {
   final List<Course> _courses = [];
+  String _sortBy = 'name'; // Default sort by name
 
-  List<Course> get courses => _courses;
+  List<Course> get courses {
+    List<Course> sortedCourses = List.from(_courses);
+    
+    switch (_sortBy) {
+      case 'emoji':
+        sortedCourses.sort((a, b) {
+          final emojiA = a.customIcon ?? '📚';
+          final emojiB = b.customIcon ?? '📚';
+          return emojiA.compareTo(emojiB);
+        });
+        break;
+      case 'name':
+      default:
+        sortedCourses.sort((a, b) => a.name.compareTo(b.name));
+        break;
+    }
+    
+    return sortedCourses;
+  }
+
+  String get sortBy => _sortBy;
+
+  void setSortBy(String sortBy) {
+    _sortBy = sortBy;
+    notifyListeners();
+  }
 
   void addCourse(Course course) {
     _courses.add(course);

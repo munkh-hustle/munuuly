@@ -19,6 +19,7 @@ class _EditCourseScreenState extends State<EditCourseScreen> {
   final _roomController = TextEditingController();
   
   Color _selectedColor = Colors.pink;
+  String _selectedEmoji = '📚'; // Default emoji
   final List<Color> _defaultColors = [
     Colors.pink,
     Colors.blue,
@@ -38,6 +39,8 @@ class _EditCourseScreenState extends State<EditCourseScreen> {
       _instructorController.text = widget.course!.instructor;
       _roomController.text = widget.course!.roomLocation;
       _selectedColor = _getColorFromString(widget.course!.color);
+      // Use customIcon field to store emoji, or default to book emoji
+      _selectedEmoji = widget.course!.customIcon ?? '📚';
     }
   }
 
@@ -57,28 +60,40 @@ class _EditCourseScreenState extends State<EditCourseScreen> {
           key: _formKey,
           child: Column(
             children: [
-              // Course Icon with Initial
-              Container(
-                width: 80,
-                height: 80,
-                decoration: BoxDecoration(
-                  color: _selectedColor,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Center(
-                  child: Text(
-                    _nameController.text.isNotEmpty 
-                        ? _nameController.text[0].toUpperCase() 
-                        : '?',
-                    style: const TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
+              // Course Icon with Emoji
+              GestureDetector(
+                onTap: _showEmojiPicker,
+                child: Container(
+                  width: 80,
+                  height: 80,
+                  decoration: BoxDecoration(
+                    color: _selectedColor,
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.1),
+                        blurRadius: 6,
+                        offset: const Offset(0, 3),
+                      ),
+                    ],
+                  ),
+                  child: Center(
+                    child: Text(
+                      _selectedEmoji,
+                      style: const TextStyle(fontSize: 32),
                     ),
                   ),
                 ),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 8),
+              Text(
+                'Tap to change emoji',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.grey.shade600,
+                ),
+              ),
+              const SizedBox(height: 16),
               
               // Course Name Field
               TextFormField(
@@ -93,7 +108,6 @@ class _EditCourseScreenState extends State<EditCourseScreen> {
                   }
                   return null;
                 },
-                onChanged: (_) => setState(() {}),
               ),
               const SizedBox(height: 16),
               
@@ -172,6 +186,21 @@ class _EditCourseScreenState extends State<EditCourseScreen> {
     );
   }
 
+  void _showEmojiPicker() {
+    // Show a dialog with a text field that will open the native emoji keyboard
+    showDialog(
+      context: context,
+      builder: (context) => EmojiPickerDialog(
+        currentEmoji: _selectedEmoji,
+        onEmojiSelected: (emoji) {
+          setState(() {
+            _selectedEmoji = emoji;
+          });
+        },
+      ),
+    );
+  }
+
   void _saveCourse() {
     if (_formKey.currentState!.validate()) {
       final courseProvider = Provider.of<CourseProvider>(context, listen: false);
@@ -181,6 +210,7 @@ class _EditCourseScreenState extends State<EditCourseScreen> {
         instructor: _instructorController.text,
         roomLocation: _roomController.text,
         color: _colorToString(_selectedColor),
+        customIcon: _selectedEmoji, // Store the selected emoji
         createdAt: widget.course?.createdAt ?? DateTime.now(),
         links: widget.course?.links ?? [],
       );
@@ -196,29 +226,158 @@ class _EditCourseScreenState extends State<EditCourseScreen> {
   }
 
   Color _getColorFromString(String colorString) {
-    switch (colorString) {
-      case 'pink': return Colors.pink;
-      case 'blue': return Colors.blue;
-      case 'green': return Colors.green;
-      case 'purple': return Colors.purple;
-      case 'orange': return Colors.orange;
-      case 'red': return Colors.red;
-      case 'teal': return Colors.teal;
-      case 'indigo': return Colors.indigo;
-      default: return Colors.pink;
-    }
+  switch (colorString) {
+    case 'pink': return Colors.pink;
+    case 'blue': return Colors.blue;
+    case 'green': return Colors.green;
+    case 'purple': return Colors.purple;
+    case 'orange': return Colors.orange;
+    case 'red': return Colors.red;
+    case 'teal': return Colors.teal;
+    case 'indigo': return Colors.indigo;
+    default: 
+      // Try to parse as hex for custom colors
+      try {
+        return Color(int.parse(colorString, radix: 16));
+      } catch (e) {
+        return Colors.pink;
+      }
   }
+}
 
   String _colorToString(Color color) {
-    if (color == Colors.pink) return 'pink';
-    if (color == Colors.blue) return 'blue';
-    if (color == Colors.green) return 'green';
-    if (color == Colors.purple) return 'purple';
-    if (color == Colors.orange) return 'orange';
-    if (color == Colors.red) return 'red';
-    if (color == Colors.teal) return 'teal';
-    if (color == Colors.indigo) return 'indigo';
-    return 'pink';
+  // For default colors, use names
+  if (color == Colors.pink) return 'pink';
+  if (color == Colors.blue) return 'blue';
+  if (color == Colors.green) return 'green';
+  if (color == Colors.purple) return 'purple';
+  if (color == Colors.orange) return 'orange';
+  if (color == Colors.red) return 'red';
+  if (color == Colors.teal) return 'teal';
+  if (color == Colors.indigo) return 'indigo';
+  
+  // For custom colors, store the hex value
+  return color.value.toRadixString(16);
+}
+}
+
+// Simple Emoji Picker Dialog that uses native keyboard
+class EmojiPickerDialog extends StatefulWidget {
+  final String currentEmoji;
+  final Function(String) onEmojiSelected;
+
+  const EmojiPickerDialog({
+    super.key,
+    required this.currentEmoji,
+    required this.onEmojiSelected,
+  });
+
+  @override
+  State<EmojiPickerDialog> createState() => _EmojiPickerDialogState();
+}
+
+class _EmojiPickerDialogState extends State<EmojiPickerDialog> {
+  final TextEditingController _emojiController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _emojiController.text = widget.currentEmoji;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              'Choose Emoji',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.grey.shade800,
+              ),
+            ),
+            const SizedBox(height: 16),
+            
+            // Current Selection Preview
+            Container(
+              width: 80,
+              height: 80,
+              decoration: BoxDecoration(
+                color: Colors.grey.shade100,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Center(
+                child: Text(
+                  _emojiController.text.isEmpty ? '📚' : _emojiController.text,
+                  style: const TextStyle(fontSize: 32),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            
+            // Emoji Input Field
+            TextField(
+              controller: _emojiController,
+              decoration: const InputDecoration(
+                labelText: 'Enter emoji',
+                border: OutlineInputBorder(),
+                hintText: 'Tap to open emoji keyboard...',
+              ),
+              onChanged: (value) {
+                widget.onEmojiSelected(value);
+              },
+              textInputAction: TextInputAction.done,
+            ),
+            const SizedBox(height: 20),
+            
+            // Action Buttons
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: Colors.black,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                    ),
+                    child: const Text('Cancel'),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () {
+                      if (_emojiController.text.isNotEmpty) {
+                        widget.onEmojiSelected(_emojiController.text);
+                      }
+                      Navigator.of(context).pop();
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.black,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                    ),
+                    child: const Text('Save'),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    _emojiController.dispose();
+    super.dispose();
   }
 }
 
