@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import '../models/link.dart';
 
 class AddLinkModal extends StatefulWidget {
-  final Function(String title, String url) onLinkAdded;
-  final Function(String title, String url)? onLinkUpdated;
+  final Function(String title, String url, bool isPassword) onLinkAdded;
+  final Function(String title, String url, bool isPassword)? onLinkUpdated;
   final Link? existingLink;
 
   const AddLinkModal({
@@ -22,6 +22,7 @@ class _AddLinkModalState extends State<AddLinkModal> {
   final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
   final _urlController = TextEditingController();
+  bool _isPassword = false;
 
   @override
   void initState() {
@@ -29,6 +30,7 @@ class _AddLinkModalState extends State<AddLinkModal> {
     if (widget.existingLink != null) {
       _titleController.text = widget.existingLink!.title;
       _urlController.text = widget.existingLink!.url;
+      _isPassword = widget.existingLink!.isPassword;
     }
   }
 
@@ -43,26 +45,58 @@ class _AddLinkModalState extends State<AddLinkModal> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            isEditing ? 'Edit Link' : 'Add New Link',
+            _isPassword ? (isEditing ? 'Edit Password' : 'Add New Password') 
+                       : (isEditing ? 'Edit Link' : 'Add New Link'),
             style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 16),
+          
+          // Toggle between Link and Password
+          Row(
+            children: [
+              Expanded(
+                child: ChoiceChip(
+                  label: const Text('Link'),
+                  selected: !_isPassword,
+                  onSelected: (selected) {
+                    setState(() {
+                      _isPassword = !selected;
+                    });
+                  },
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: ChoiceChip(
+                  label: const Text('Password'),
+                  selected: _isPassword,
+                  onSelected: (selected) {
+                    setState(() {
+                      _isPassword = selected;
+                    });
+                  },
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          
           Form(
             key: _formKey,
             child: Column(
               children: [
                 TextFormField(
                   controller: _titleController,
-                  decoration: const InputDecoration(
-                    labelText: 'Title',
-                    border: OutlineInputBorder(),
-                    focusedBorder: OutlineInputBorder(
+                  decoration: InputDecoration(
+                    labelText: _isPassword ? 'Username/Email' : 'Title',
+                    border: const OutlineInputBorder(),
+                    focusedBorder: const OutlineInputBorder(
                       borderSide: BorderSide(color: Colors.pink),
                     ),
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter a title';
+                      return _isPassword ? 'Please enter username/email' : 'Please enter a title';
                     }
                     return null;
                   },
@@ -70,13 +104,23 @@ class _AddLinkModalState extends State<AddLinkModal> {
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _urlController,
-                  decoration: const InputDecoration(
-                    labelText: 'URL',
-                    border: OutlineInputBorder(),
-                    focusedBorder: OutlineInputBorder(
+                  decoration: InputDecoration(
+                    labelText: _isPassword ? 'Password' : 'URL',
+                    border: const OutlineInputBorder(),
+                    focusedBorder: const OutlineInputBorder(
                       borderSide: BorderSide(color: Colors.pink),
                     ),
                   ),
+                  obscureText: _isPassword, // Hide password text
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return _isPassword ? 'Please enter password' : 'Please enter a URL';
+                    }
+                    if (!_isPassword && !value.startsWith('http://') && !value.startsWith('https://')) {
+                      return 'Please enter a valid URL (include http:// or https://)';
+                    }
+                    return null;
+                  },
                 ),
               ],
             ),
@@ -122,9 +166,9 @@ class _AddLinkModalState extends State<AddLinkModal> {
   void _saveLink() {
     if (_formKey.currentState!.validate()) {
       if (widget.existingLink != null && widget.onLinkUpdated != null) {
-        widget.onLinkUpdated!(_titleController.text, _urlController.text);
+        widget.onLinkUpdated!(_titleController.text, _urlController.text, _isPassword);
       } else {
-        widget.onLinkAdded(_titleController.text, _urlController.text);
+        widget.onLinkAdded(_titleController.text, _urlController.text, _isPassword);
       }
       Navigator.of(context).pop();
     }

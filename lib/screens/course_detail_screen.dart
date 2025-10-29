@@ -79,7 +79,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> with SingleTick
                 TabBar(
                   controller: _tabController,
                   tabs: const [
-                    Tab(text: 'To-do'),
+                    Tab(text: 'Info'),
                     Tab(text: 'Files'),
                     Tab(text: 'Study Sets'),
                     Tab(text: 'Links'),
@@ -158,19 +158,20 @@ Widget _buildLinksTab(Course course) {
                 context: context,
                 isScrollControlled: true,
                 builder: (context) => AddLinkModal(
-                  onLinkAdded: (title, url) {
-                    final courseProvider = Provider.of<CourseProvider>(context, listen: false);
-                    courseProvider.addLinkToCourse(
-                      course.id,
-                      Link(
-                        id: DateTime.now().millisecondsSinceEpoch.toString(),
-                        title: title,
-                        url: url,
-                        createdAt: DateTime.now(),
-                      ),
-                    );
-                  },
-                ),
+  onLinkAdded: (title, url, isPassword) {
+    final courseProvider = Provider.of<CourseProvider>(context, listen: false);
+    courseProvider.addLinkToCourse(
+      course.id,
+      Link(
+        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        title: title,
+        url: url,
+        createdAt: DateTime.now(),
+        isPassword: isPassword,
+      ),
+    );
+  },
+)
               );
             },
             style: ElevatedButton.styleFrom(
@@ -206,12 +207,12 @@ Widget _buildLinksTab(Course course) {
                           context: context,
                           isScrollControlled: true,
                           builder: (context) => AddLinkModal(
-                            existingLink: linkToEdit,
-                            onLinkUpdated: (title, url) {
-                              final courseProvider = Provider.of<CourseProvider>(context, listen: false);
-                              courseProvider.updateLinkInCourse(course.id, linkToEdit.id, title, url);
-                            },
-                            onLinkAdded: (title, url) {}, // Not used in edit mode
+  existingLink: linkToEdit,
+  onLinkUpdated: (title, url, isPassword) {
+    final courseProvider = Provider.of<CourseProvider>(context, listen: false);
+    courseProvider.updateLinkInCourse(course.id, linkToEdit.id, title, url, isPassword);
+  },
+  onLinkAdded: (title, url, isPassword) {}, // Not used in edit mode
                           ),
                         );
                       },

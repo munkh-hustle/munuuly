@@ -77,24 +77,25 @@ class CourseProvider with ChangeNotifier {
     }
   }
 
-  // ADD THIS METHOD - Update an existing link in a course
-  void updateLinkInCourse(String courseId, String linkId, String newTitle, String newUrl) {
-    final course = getCourseById(courseId);
-    if (course != null) {
-      final updatedLinks = course.links.map((link) {
-        if (link.id == linkId) {
-          return Link(
-            id: link.id,
-            title: newTitle,
-            url: newUrl,
-            createdAt: link.createdAt,
-          );
-        }
-        return link;
-      }).toList();
-      
-      final updatedCourse = course.copyWith(links: updatedLinks);
-      updateCourse(courseId, updatedCourse);
-    }
+  // In the updateLinkInCourse method of course_provider.dart
+void updateLinkInCourse(String courseId, String linkId, String newTitle, String newUrl, bool isPassword) {
+  final course = getCourseById(courseId);
+  if (course != null) {
+    final updatedLinks = course.links.map((link) {
+      if (link.id == linkId) {
+        return Link(
+          id: link.id,
+          title: newTitle,
+          url: newUrl,
+          createdAt: link.createdAt,
+          isPassword: isPassword,
+        );
+      }
+      return link;
+    }).toList();
+    
+    final updatedCourse = course.copyWith(links: updatedLinks);
+    updateCourse(courseId, updatedCourse);
   }
+}
 }
