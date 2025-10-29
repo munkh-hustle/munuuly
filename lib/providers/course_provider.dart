@@ -76,4 +76,25 @@ class CourseProvider with ChangeNotifier {
       updateCourse(courseId, updatedCourse);
     }
   }
+
+  // ADD THIS METHOD - Update an existing link in a course
+  void updateLinkInCourse(String courseId, String linkId, String newTitle, String newUrl) {
+    final course = getCourseById(courseId);
+    if (course != null) {
+      final updatedLinks = course.links.map((link) {
+        if (link.id == linkId) {
+          return Link(
+            id: link.id,
+            title: newTitle,
+            url: newUrl,
+            createdAt: link.createdAt,
+          );
+        }
+        return link;
+      }).toList();
+      
+      final updatedCourse = course.copyWith(links: updatedLinks);
+      updateCourse(courseId, updatedCourse);
+    }
+  }
 }

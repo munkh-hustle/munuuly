@@ -1,10 +1,18 @@
-// lib\widgets\add_link_modal.dart
+// add_link_modal.dart
 import 'package:flutter/material.dart';
+import '../models/link.dart';
 
 class AddLinkModal extends StatefulWidget {
   final Function(String title, String url) onLinkAdded;
+  final Function(String title, String url)? onLinkUpdated;
+  final Link? existingLink;
 
-  const AddLinkModal({super.key, required this.onLinkAdded});
+  const AddLinkModal({
+    super.key,
+    required this.onLinkAdded,
+    this.onLinkUpdated,
+    this.existingLink,
+  });
 
   @override
   State<AddLinkModal> createState() => _AddLinkModalState();
@@ -16,16 +24,27 @@ class _AddLinkModalState extends State<AddLinkModal> {
   final _urlController = TextEditingController();
 
   @override
+  void initState() {
+    super.initState();
+    if (widget.existingLink != null) {
+      _titleController.text = widget.existingLink!.title;
+      _urlController.text = widget.existingLink!.url;
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final isEditing = widget.existingLink != null;
+    
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Add New Link',
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          Text(
+            isEditing ? 'Edit Link' : 'Add New Link',
+            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 16),
           Form(
@@ -58,12 +77,6 @@ class _AddLinkModalState extends State<AddLinkModal> {
                       borderSide: BorderSide(color: Colors.pink),
                     ),
                   ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter a URL';
-                    }
-                    return null;
-                  },
                 ),
               ],
             ),
@@ -87,14 +100,14 @@ class _AddLinkModalState extends State<AddLinkModal> {
               const SizedBox(width: 16),
               Expanded(
                 child: OutlinedButton(
-                  onPressed: _createLink,
+                  onPressed: _saveLink,
                   style: OutlinedButton.styleFrom(
                     side: const BorderSide(color: Colors.pink),
                     padding: const EdgeInsets.symmetric(vertical: 16),
                   ),
-                  child: const Text(
-                    'Create',
-                    style: TextStyle(color: Colors.pink),
+                  child: Text(
+                    isEditing ? 'Update' : 'Create',
+                    style: const TextStyle(color: Colors.pink),
                   ),
                 ),
               ),
@@ -106,9 +119,13 @@ class _AddLinkModalState extends State<AddLinkModal> {
     );
   }
 
-  void _createLink() {
+  void _saveLink() {
     if (_formKey.currentState!.validate()) {
-      widget.onLinkAdded(_titleController.text, _urlController.text);
+      if (widget.existingLink != null && widget.onLinkUpdated != null) {
+        widget.onLinkUpdated!(_titleController.text, _urlController.text);
+      } else {
+        widget.onLinkAdded(_titleController.text, _urlController.text);
+      }
       Navigator.of(context).pop();
     }
   }

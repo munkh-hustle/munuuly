@@ -143,71 +143,86 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> with SingleTick
     );
   }
 
-  Widget _buildLinksTab(Course course) {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        children: [
-          // Add Link Button
-          Align(
-            alignment: Alignment.centerRight,
-            child: ElevatedButton(
-              onPressed: () {
-                showModalBottomSheet(
-                  context: context,
-                  isScrollControlled: true,
-                  builder: (context) => AddLinkModal(
-                    onLinkAdded: (title, url) {
-                      final courseProvider = Provider.of<CourseProvider>(context, listen: false);
-                      courseProvider.addLinkToCourse(
-                        course.id,
-                        Link(
-                          id: DateTime.now().millisecondsSinceEpoch.toString(),
-                          title: title,
-                          url: url,
-                          createdAt: DateTime.now(),
-                        ),
-                      );
-                    },
-                  ),
-                );
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.black,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-              ),
-              child: const Text('+ Link'),
+// In the _buildLinksTab method of course_detail_screen.dart
+Widget _buildLinksTab(Course course) {
+  return Padding(
+    padding: const EdgeInsets.all(16.0),
+    child: Column(
+      children: [
+        // Add Link Button
+        Align(
+          alignment: Alignment.centerRight,
+          child: ElevatedButton(
+            onPressed: () {
+              showModalBottomSheet(
+                context: context,
+                isScrollControlled: true,
+                builder: (context) => AddLinkModal(
+                  onLinkAdded: (title, url) {
+                    final courseProvider = Provider.of<CourseProvider>(context, listen: false);
+                    courseProvider.addLinkToCourse(
+                      course.id,
+                      Link(
+                        id: DateTime.now().millisecondsSinceEpoch.toString(),
+                        title: title,
+                        url: url,
+                        createdAt: DateTime.now(),
+                      ),
+                    );
+                  },
+                ),
+              );
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.black,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
             ),
+            child: const Text('+ Link'),
           ),
-          const SizedBox(height: 16),
-          // Links List
-          Expanded(
-            child: course.links.isEmpty
-                ? const Center(
-                    child: Text(
-                      'No links added yet',
-                      style: TextStyle(color: Colors.grey),
-                    ),
-                  )
-                : ListView.builder(
-                    itemCount: course.links.length,
-                    itemBuilder: (context, index) {
-                      final link = course.links[index];
-                      return LinkItem(
-                        link: link,
-                        onDelete: () {
-                          Provider.of<CourseProvider>(context, listen: false)
-                              .removeLinkFromCourse(course.id, link.id);
-                        },
-                      );
-                    },
+        ),
+        const SizedBox(height: 16),
+        // Links List
+        Expanded(
+          child: course.links.isEmpty
+              ? const Center(
+                  child: Text(
+                    'No links added yet',
+                    style: TextStyle(color: Colors.grey),
                   ),
-          ),
-        ],
-      ),
-    );
-  }
+                )
+              : ListView.builder(
+                  itemCount: course.links.length,
+                  itemBuilder: (context, index) {
+                    final link = course.links[index];
+                    return LinkItem(
+                      link: link,
+                      onDelete: () {
+                        Provider.of<CourseProvider>(context, listen: false)
+                            .removeLinkFromCourse(course.id, link.id);
+                      },
+                      onEdit: (linkToEdit) {
+                        showModalBottomSheet(
+                          context: context,
+                          isScrollControlled: true,
+                          builder: (context) => AddLinkModal(
+                            existingLink: linkToEdit,
+                            onLinkUpdated: (title, url) {
+                              final courseProvider = Provider.of<CourseProvider>(context, listen: false);
+                              courseProvider.updateLinkInCourse(course.id, linkToEdit.id, title, url);
+                            },
+                            onLinkAdded: (title, url) {}, // Not used in edit mode
+                          ),
+                        );
+                      },
+                    );
+                  },
+                ),
+        ),
+      ],
+    ),
+  );
+}
 
   Widget _buildTodoTab() => const Center(child: Text('To-do Content'));
   Widget _buildFilesTab() => const Center(child: Text('Files Content'));
