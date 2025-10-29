@@ -66,7 +66,7 @@ class Course {
   }
 }
 
-// In course.dart - simplified InfoItem model
+// In course.dart - updated InfoItem model
 class InfoItem {
   String id;
   String title;
@@ -74,7 +74,7 @@ class InfoItem {
   String emoji;
   DateTime createdAt;
   DateTime lastEdited;
-  Link? connectedLink;
+  List<Link> connectedLinks; // Changed from single Link to List
   List<String> tags;
 
   InfoItem({
@@ -84,7 +84,7 @@ class InfoItem {
     required this.emoji,
     required this.createdAt,
     required this.lastEdited,
-    this.connectedLink,
+    List<Link>? connectedLinks, // Updated parameter
     this.tags = const [],
-  });
+  }) : connectedLinks = connectedLinks ?? [];
 }

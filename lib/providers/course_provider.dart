@@ -98,7 +98,8 @@ void updateLinkInCourse(String courseId, String linkId, String newTitle, String 
     updateCourse(courseId, updatedCourse);
   }
 }
-// In course_provider.dart - simplified methods
+
+// In course_provider.dart - updated methods
 void addInfoItemToCourse(String courseId, InfoItem infoItem) {
   final course = getCourseById(courseId);
   if (course != null) {

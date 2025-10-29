@@ -1,11 +1,11 @@
-// widgets/add_info_modal.dart
+// Updated widgets/add_info_modal.dart
 import 'package:flutter/material.dart';
 import '../models/course.dart';
 import '../models/link.dart';
 
 class AddInfoModal extends StatefulWidget {
-  final Function(String title, String description, String emoji, Link? connectedLink, List<String> tags)? onInfoAdded;
-  final Function(String title, String description, String emoji, Link? connectedLink, List<String> tags)? onInfoUpdated;
+  final Function(String title, String description, String emoji, List<Link> connectedLinks, List<String> tags)? onInfoAdded;
+  final Function(String title, String description, String emoji, List<Link> connectedLinks, List<String> tags)? onInfoUpdated;
   final InfoItem? existingInfoItem;
   final List<Link> availableLinks;
 
@@ -27,7 +27,7 @@ class _AddInfoModalState extends State<AddInfoModal> {
   final _descriptionController = TextEditingController();
   final _tagsController = TextEditingController();
   String _selectedEmoji = '📝';
-  Link? _selectedLink;
+  List<Link> _selectedLinks = []; // Changed from single Link to List
   List<String> _tags = [];
 
   @override
@@ -37,7 +37,7 @@ class _AddInfoModalState extends State<AddInfoModal> {
       _titleController.text = widget.existingInfoItem!.title;
       _descriptionController.text = widget.existingInfoItem!.description;
       _selectedEmoji = widget.existingInfoItem!.emoji;
-      _selectedLink = widget.existingInfoItem!.connectedLink;
+      _selectedLinks = List.from(widget.existingInfoItem!.connectedLinks); // Updated
       _tags = List.from(widget.existingInfoItem!.tags);
     }
   }
@@ -142,34 +142,71 @@ class _AddInfoModalState extends State<AddInfoModal> {
                   const SizedBox(height: 16),
                 ],
                 
-                // Link Connection
+                // Multiple Links Connection
                 if (widget.availableLinks.isNotEmpty) ...[
-                  DropdownButtonFormField<Link?>(
-                    value: _selectedLink,
-                    decoration: const InputDecoration(
-                      labelText: 'Connect to Link/Password (Optional)',
-                      border: OutlineInputBorder(),
-                    ),
-                    items: [
-                      const DropdownMenuItem(
-                        value: null,
-                        child: Text('No connection'),
-                      ),
-                      ...widget.availableLinks.map((link) {
-                        return DropdownMenuItem(
-                          value: link,
-                          child: Text(
-                            '${link.isPassword ? '🔐' : '🔗'} ${link.title}',
-                          ),
-                        );
-                      }).toList(),
-                    ],
-                    onChanged: (Link? link) {
-                      setState(() {
-                        _selectedLink = link;
-                      });
-                    },
+                  const Text(
+                    'Connect Links/Passwords:',
+                    style: TextStyle(fontWeight: FontWeight.bold),
                   ),
+                  const SizedBox(height: 8),
+                  
+                  Container(
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.grey.shade300),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    constraints: const BoxConstraints(maxHeight: 150),
+                    child: ListView.builder(
+                      shrinkWrap: true,
+                      itemCount: widget.availableLinks.length,
+                      itemBuilder: (context, index) {
+                        final link = widget.availableLinks[index];
+                        final isSelected = _selectedLinks.any((l) => l.id == link.id);
+                        
+                        return CheckboxListTile(
+                          title: Text(
+                            '${link.isPassword ? '🔐' : '🔗'} ${link.title}',
+                            style: TextStyle(
+                              fontSize: 14,
+                            ),
+                          ),
+                          subtitle: Text(
+                            link.isPassword ? '••••••••' : link.url,
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey.shade600,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          value: isSelected,
+                          onChanged: (bool? selected) {
+                            setState(() {
+                              if (selected == true) {
+                                _selectedLinks.add(link);
+                              } else {
+                                _selectedLinks.removeWhere((l) => l.id == link.id);
+                              }
+                            });
+                          },
+                          dense: true,
+                          controlAffinity: ListTileControlAffinity.leading,
+                        );
+                      },
+                    ),
+                  ),
+                  
+                  // Selected links summary
+                  if (_selectedLinks.isNotEmpty) ...[
+                    const SizedBox(height: 8),
+                    Text(
+                      'Selected: ${_selectedLinks.length} link${_selectedLinks.length > 1 ? 's' : ''}',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey.shade600,
+                      ),
+                    ),
+                  ],
                   const SizedBox(height: 16),
                 ],
               ],
@@ -237,7 +274,7 @@ class _AddInfoModalState extends State<AddInfoModal> {
           _titleController.text,
           _descriptionController.text,
           _selectedEmoji,
-          _selectedLink,
+          _selectedLinks, // Updated parameter
           _tags,
         );
       } else if (widget.onInfoAdded != null) {
@@ -245,7 +282,7 @@ class _AddInfoModalState extends State<AddInfoModal> {
           _titleController.text,
           _descriptionController.text,
           _selectedEmoji,
-          _selectedLink,
+          _selectedLinks, // Updated parameter
           _tags,
         );
       }

@@ -113,77 +113,139 @@ class InfoItemCard extends StatelessWidget {
   }
 
   Widget _buildQuickActions(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        // Quick link access
-        if (infoItem.connectedLink != null)
-          IconButton(
-            icon: Icon(
-              infoItem.connectedLink!.isPassword 
-                  ? Icons.lock_open 
-                  : Icons.open_in_new,
-              size: 18,
-              color: Colors.grey.shade600,
-            ),
-            onPressed: () => _handleQuickAccess(context, infoItem.connectedLink!),
-            padding: EdgeInsets.zero,
-            constraints: const BoxConstraints(),
+  return Row(
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      // Quick access to first link if available
+      if (infoItem.connectedLinks.isNotEmpty)
+        IconButton(
+          icon: Icon(
+            infoItem.connectedLinks.first.isPassword 
+                ? Icons.lock_open 
+                : Icons.open_in_new,
+            size: 18,
+            color: Colors.grey.shade600,
           ),
-        
-        // More options
-        PopupMenuButton<String>(
-          icon: const Icon(Icons.more_vert, size: 18),
-          onSelected: (value) => _handleMenuAction(context, value),
-          itemBuilder: (BuildContext context) => [
-            const PopupMenuItem<String>(
-              value: 'edit',
-              child: Row(
-                children: [
-                  Icon(Icons.edit, size: 18),
-                  SizedBox(width: 8),
-                  Text('Edit'),
-                ],
-              ),
+          onPressed: () => _handleQuickAccess(context, infoItem.connectedLinks.first),
+          padding: EdgeInsets.zero,
+          constraints: const BoxConstraints(),
+        ),
+      
+      // More options
+      PopupMenuButton<String>(
+        icon: const Icon(Icons.more_vert, size: 18),
+        onSelected: (value) => _handleMenuAction(context, value),
+        itemBuilder: (BuildContext context) => [
+          const PopupMenuItem<String>(
+            value: 'edit',
+            child: Row(
+              children: [
+                Icon(Icons.edit, size: 18),
+                SizedBox(width: 8),
+                Text('Edit'),
+              ],
             ),
-            if (infoItem.connectedLink != null) ...[
-              PopupMenuItem<String>(
-                value: 'copy_link',
-                child: Row(
-                  children: [
-                    const Icon(Icons.copy, size: 18),
-                    const SizedBox(width: 8),
-                    Text(infoItem.connectedLink!.isPassword 
-                        ? 'Copy Password' 
-                        : 'Copy URL'),
-                  ],
-                ),
-              ),
-            ],
+          ),
+          if (infoItem.connectedLinks.isNotEmpty) ...[
             const PopupMenuItem<String>(
-              value: 'delete',
+              value: 'show_links',
               child: Row(
                 children: [
-                  Icon(Icons.delete, color: Colors.red, size: 18),
+                  Icon(Icons.link, size: 18),
                   SizedBox(width: 8),
-                  Text('Delete', style: TextStyle(color: Colors.red)),
+                  Text('Show All Links'),
                 ],
               ),
             ),
           ],
+          const PopupMenuItem<String>(
+            value: 'delete',
+            child: Row(
+              children: [
+                Icon(Icons.delete, color: Colors.red, size: 18),
+                SizedBox(width: 8),
+                Text('Delete', style: TextStyle(color: Colors.red)),
+              ],
+            ),
+          ),
+        ],
+      ),
+    ],
+  );
+}
+
+// Add method to show all links
+void _handleMenuAction(BuildContext context, String value) {
+  switch (value) {
+    case 'edit':
+      onEdit();
+      break;
+    case 'show_links':
+      _showAllLinksDialog(context);
+      break;
+    case 'delete':
+      onDelete();
+      break;
+  }
+}
+
+void _showAllLinksDialog(BuildContext context) {
+  showDialog(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: const Text('Connected Links'),
+      content: SizedBox(
+        width: double.maxFinite,
+        child: ListView.builder(
+          shrinkWrap: true,
+          itemCount: infoItem.connectedLinks.length,
+          itemBuilder: (context, index) {
+            final link = infoItem.connectedLinks[index];
+            return ListTile(
+              leading: Icon(link.isPassword ? Icons.lock : Icons.link),
+              title: Text(link.title),
+              subtitle: Text(link.isPassword ? '••••••••' : link.url),
+              trailing: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.copy, size: 16),
+                    onPressed: () => _copyToClipboard(
+                      context, 
+                      link.isPassword ? link.url : link.title,
+                      link.isPassword ? 'Password' : 'Title'
+                    ),
+                  ),
+                  if (!link.isPassword)
+                    IconButton(
+                      icon: const Icon(Icons.open_in_new, size: 16),
+                      onPressed: () => _launchURL(context, link.url),
+                    ),
+                ],
+              ),
+            );
+          },
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('Close'),
         ),
       ],
-    );
-  }
+    ),
+  );
+}
 
-  Widget _buildMetadataFooter() {
-    return Wrap(
-      spacing: 8,
-      runSpacing: 4,
-      children: [
-        // Connected link indicator
-        if (infoItem.connectedLink != null)
-          Container(
+Widget _buildMetadataFooter() {
+  return Wrap(
+    spacing: 8,
+    runSpacing: 4,
+    children: [
+      // Connected links indicators
+      if (infoItem.connectedLinks.isNotEmpty)
+        ...infoItem.connectedLinks.take(2).map((link) {
+          return Container(
             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
             decoration: BoxDecoration(
               color: Colors.blue.shade50,
@@ -194,13 +256,13 @@ class InfoItemCard extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Icon(
-                  infoItem.connectedLink!.isPassword ? Icons.lock : Icons.link,
+                  link.isPassword ? Icons.lock : Icons.link,
                   size: 10,
                   color: Colors.blue,
                 ),
                 const SizedBox(width: 2),
                 Text(
-                  infoItem.connectedLink!.title,
+                  link.title,
                   style: const TextStyle(
                     fontSize: 10,
                     color: Colors.blue,
@@ -211,40 +273,38 @@ class InfoItemCard extends StatelessWidget {
                 ),
               ],
             ),
+          );
+        }).toList(),
+      
+      // Show "+X more" if there are more than 2 links
+      if (infoItem.connectedLinks.length > 2)
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+          decoration: BoxDecoration(
+            color: Colors.grey.shade200,
+            borderRadius: BorderRadius.circular(4),
           ),
-        
-        // Last edited
-        Text(
-          'Edited ${_formatTimeAgo(infoItem.lastEdited)}',
-          style: TextStyle(
-            fontSize: 10,
-            color: Colors.grey.shade500,
+          child: Text(
+            '+${infoItem.connectedLinks.length - 2} more',
+            style: TextStyle(
+              fontSize: 10,
+              color: Colors.grey.shade600,
+              fontWeight: FontWeight.w500,
+            ),
           ),
         ),
-      ],
-    );
-  }
-
-  void _handleMenuAction(BuildContext context, String value) {
-    switch (value) {
-      case 'edit':
-        onEdit();
-        break;
-      case 'copy_link':
-        if (infoItem.connectedLink != null) {
-          _copyToClipboard(
-            context, 
-            infoItem.connectedLink!.url, 
-            infoItem.connectedLink!.isPassword ? 'Password' : 'URL'
-          );
-        }
-        break;
-      case 'delete':
-        onDelete();
-        break;
-    }
-  }
-
+      
+      // Last edited
+      Text(
+        'Edited ${_formatTimeAgo(infoItem.lastEdited)}',
+        style: TextStyle(
+          fontSize: 10,
+          color: Colors.grey.shade500,
+        ),
+      ),
+    ],
+  );
+}
   void _handleQuickAccess(BuildContext context, Link link) {
     if (link.isPassword) {
       // Show password dialog

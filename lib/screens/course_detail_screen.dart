@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../providers/course_provider.dart';
 import '../widgets/add_link_modal.dart';
 import '../widgets/link_item.dart';
@@ -244,7 +246,7 @@ Widget _buildTodoTab(Course course) {
                 context: context,
                 isScrollControlled: true,
                 builder: (context) => AddInfoModal(
-                  onInfoAdded: (title, description, emoji, connectedLink, tags) {
+                  onInfoAdded: (title, description, emoji, connectedLinks, tags) { // Updated parameter name
                     final courseProvider = Provider.of<CourseProvider>(context, listen: false);
                     final newInfoItem = InfoItem(
                       id: DateTime.now().millisecondsSinceEpoch.toString(),
@@ -253,7 +255,7 @@ Widget _buildTodoTab(Course course) {
                       emoji: emoji,
                       createdAt: DateTime.now(),
                       lastEdited: DateTime.now(),
-                      connectedLink: connectedLink,
+                      connectedLinks: connectedLinks, // Updated parameter name
                       tags: tags,
                     );
                     courseProvider.addInfoItemToCourse(course.id, newInfoItem);
@@ -310,7 +312,7 @@ Widget _buildTodoTab(Course course) {
                           isScrollControlled: true,
                           builder: (context) => AddInfoModal(
                             existingInfoItem: infoItem,
-                            onInfoUpdated: (title, description, emoji, connectedLink, tags) {
+                            onInfoUpdated: (title, description, emoji, connectedLinks, tags) { // Updated parameter name
                               final courseProvider = Provider.of<CourseProvider>(context, listen: false);
                               final updatedInfoItem = InfoItem(
                                 id: infoItem.id,
@@ -319,7 +321,7 @@ Widget _buildTodoTab(Course course) {
                                 emoji: emoji,
                                 createdAt: infoItem.createdAt,
                                 lastEdited: DateTime.now(),
-                                connectedLink: connectedLink,
+                                connectedLinks: connectedLinks, // Updated parameter name
                                 tags: tags,
                               );
                               courseProvider.updateInfoItemInCourse(course.id, infoItem.id, updatedInfoItem);
@@ -337,6 +339,7 @@ Widget _buildTodoTab(Course course) {
   );
 }
 
+// In course_detail_screen.dart - update the _showInfoItemDetail method
 void _showInfoItemDetail(BuildContext context, InfoItem infoItem) {
   showDialog(
     context: context,
@@ -360,21 +363,63 @@ void _showInfoItemDetail(BuildContext context, InfoItem infoItem) {
               ),
               const SizedBox(height: 16),
             ],            
-            if (infoItem.connectedLink != null) ...[
-              Row(
-                children: [
-                  Icon(
-                    infoItem.connectedLink!.isPassword ? Icons.lock : Icons.link,
-                    size: 16,
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    'Connected to: ${infoItem.connectedLink!.title}',
-                    style: const TextStyle(fontSize: 14),
-                  ),
-                ],
+            
+            // Connected links section
+            if (infoItem.connectedLinks.isNotEmpty) ...[
+              const Text(
+                'Connected Links:',
+                style: TextStyle(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
+              ...infoItem.connectedLinks.map((link) {
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: Row(
+                    children: [
+                      Icon(
+                        link.isPassword ? Icons.lock : Icons.link,
+                        size: 16,
+                        color: Colors.blue,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              link.title,
+                              style: const TextStyle(fontSize: 14),
+                            ),
+                            Text(
+                              link.isPassword ? '••••••••' : link.url,
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey.shade600,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.copy, size: 16),
+                        onPressed: () {
+                          _copyToClipboard(
+                            context,
+                            link.isPassword ? link.url : link.title,
+                            link.isPassword ? 'Password' : 'URL'
+                          );
+                        },
+                      ),
+                      if (!link.isPassword)
+                        IconButton(
+                          icon: const Icon(Icons.open_in_new, size: 16),
+                          onPressed: () => _launchURL(context, link.url),
+                        ),
+                    ],
+                  ),
+                );
+              }).toList(),
+              const SizedBox(height: 16),
             ],
             
             // Tags display
@@ -405,6 +450,31 @@ void _showInfoItemDetail(BuildContext context, InfoItem infoItem) {
       ],
     ),
   );
+}
+
+// Add helper methods for clipboard and URL launching
+void _copyToClipboard(BuildContext context, String text, String type) {
+  Clipboard.setData(ClipboardData(text: text));
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(
+      content: Text('$type copied to clipboard'),
+      backgroundColor: Colors.green,
+    ),
+  );
+}
+
+Future<void> _launchURL(BuildContext context, String url) async {
+  final Uri uri = Uri.parse(url);
+  if (await canLaunchUrl(uri)) {
+    await launchUrl(uri);
+  } else {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Could not launch $url'),
+        backgroundColor: Colors.red,
+      ),
+    );
+  }
 }
 
 String _formatDateTime(DateTime dateTime) {
