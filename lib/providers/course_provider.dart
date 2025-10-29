@@ -98,8 +98,7 @@ void updateLinkInCourse(String courseId, String linkId, String newTitle, String 
     updateCourse(courseId, updatedCourse);
   }
 }
-// Add these methods to CourseProvider class in course_provider.dart
-
+// In course_provider.dart - update the methods
 void addInfoItemToCourse(String courseId, InfoItem infoItem) {
   final course = getCourseById(courseId);
   if (course != null) {
@@ -117,6 +116,37 @@ void updateInfoItemInCourse(String courseId, String infoItemId, InfoItem updated
     final updatedInfoItems = course.infoItems.map((item) {
       if (item.id == infoItemId) {
         return updatedInfoItem;
+      }
+      return item;
+    }).toList();
+    
+    final updatedCourse = course.copyWith(
+      infoItems: updatedInfoItems,
+      lastEdited: DateTime.now(),
+    );
+    updateCourse(courseId, updatedCourse);
+  }
+}
+
+void toggleInfoItemCompletion(String courseId, String infoItemId) {
+  final course = getCourseById(courseId);
+  if (course != null) {
+    final updatedInfoItems = course.infoItems.map((item) {
+      if (item.id == infoItemId && item.type == InfoType.task) {
+        return InfoItem(
+          id: item.id,
+          title: item.title,
+          description: item.description,
+          emoji: item.emoji,
+          deadline: item.deadline,
+          createdAt: item.createdAt,
+          lastEdited: DateTime.now(),
+          connectedLink: item.connectedLink,
+          type: item.type,
+          priority: item.priority,
+          tags: item.tags,
+          isCompleted: !item.isCompleted,
+        );
       }
       return item;
     }).toList();

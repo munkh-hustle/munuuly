@@ -1,7 +1,7 @@
-// widgets/info_item_card.dart
+// Updated info_item_card.dart
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:flutter/services.dart'; // For Clipboard
+import 'package:flutter/services.dart';
 import '../models/course.dart';
 import '../models/link.dart';
 
@@ -10,6 +10,7 @@ class InfoItemCard extends StatelessWidget {
   final VoidCallback onTap;
   final VoidCallback onDelete;
   final VoidCallback onEdit;
+  final VoidCallback? onToggleComplete;
 
   const InfoItemCard({
     super.key,
@@ -17,6 +18,7 @@ class InfoItemCard extends StatelessWidget {
     required this.onTap,
     required this.onDelete,
     required this.onEdit,
+    this.onToggleComplete,
   });
 
   @override
@@ -27,207 +29,301 @@ class InfoItemCard extends StatelessWidget {
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Header with emoji and title
-              Row(
-                children: [
-                  // Emoji container
-                  Container(
-                    width: 40,
-                    height: 40,
-                    decoration: BoxDecoration(
-                      color: Colors.grey.shade100,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Center(
-                      child: Text(
-                        infoItem.emoji,
-                        style: const TextStyle(fontSize: 18),
+        child: Container(
+          decoration: BoxDecoration(
+            border: Border(
+  left: BorderSide(
+    color: infoItem.priority.color,
+    width: 4,
+  ),
+), 
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Header with emoji, title, and actions
+                Row(
+                  children: [
+                    // Completion checkbox for tasks
+                    if (infoItem.type == InfoType.task) ...[
+                      IconButton(
+                        icon: Icon(
+                          infoItem.isCompleted 
+                              ? Icons.check_circle 
+                              : Icons.radio_button_unchecked,
+                          color: infoItem.isCompleted ? Colors.green : Colors.grey,
+                        ),
+                        onPressed: onToggleComplete,
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(),
                       ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          infoItem.title,
-                          style: const TextStyle(
-                            fontWeight: FontWeight.w600,
-                            fontSize: 16,
-                          ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          'Last edited: ${_formatTimeAgo(infoItem.lastEdited)}',
-                          style: TextStyle(
-                            fontSize: 11,
-                            color: Colors.grey.shade600,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  PopupMenuButton<String>(
-                    icon: const Icon(Icons.more_vert, size: 20),
-                    onSelected: (value) {
-                      switch (value) {
-                        case 'edit':
-                          onEdit();
-                          break;
-                        case 'delete':
-                          onDelete();
-                          break;
-                      }
-                    },
-                    itemBuilder: (BuildContext context) => [
-                      const PopupMenuItem<String>(
-                        value: 'edit',
-                        child: Row(
-                          children: [
-                            Icon(Icons.edit, size: 18),
-                            SizedBox(width: 8),
-                            Text('Edit'),
-                          ],
-                        ),
-                      ),
-                      const PopupMenuItem<String>(
-                        value: 'delete',
-                        child: Row(
-                          children: [
-                            Icon(Icons.delete, color: Colors.red, size: 18),
-                            SizedBox(width: 8),
-                            Text('Delete', style: TextStyle(color: Colors.red)),
-                          ],
-                        ),
-                      ),
+                      const SizedBox(width: 8),
                     ],
-                  ),
-                ],
-              ),
-              
-              const SizedBox(height: 12),
-              
-              // Description preview
-              if (infoItem.description.isNotEmpty) ...[
-                Text(
-                  infoItem.description,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey.shade700,
-                  ),
-                ),
-                const SizedBox(height: 12),
-              ],
-              
-              // Metadata footer
-              Row(
-                children: [
-                  // Deadline indicator
-                  if (infoItem.deadline != null) ...[
+                    
+                    // Emoji container
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      width: 32,
+                      height: 32,
                       decoration: BoxDecoration(
-                        color: _getDeadlineColor(infoItem.deadline!).withOpacity(0.1),
+                        color: _getEmojiColor(infoItem.type),
                         borderRadius: BorderRadius.circular(6),
-                        border: Border.all(
-                          color: _getDeadlineColor(infoItem.deadline!).withOpacity(0.3),
+                      ),
+                      child: Center(
+                        child: Text(
+                          infoItem.emoji,
+                          style: const TextStyle(fontSize: 14),
                         ),
                       ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
+                    ),
+                    const SizedBox(width: 12),
+                    
+                    // Title and metadata
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Icon(
-                            Icons.access_time,
-                            size: 12,
-                            color: _getDeadlineColor(infoItem.deadline!),
-                          ),
-                          const SizedBox(width: 4),
                           Text(
-                            _formatDeadline(infoItem.deadline!),
+                            infoItem.title,
                             style: TextStyle(
-                              fontSize: 11,
-                              color: _getDeadlineColor(infoItem.deadline!),
-                              fontWeight: FontWeight.w500,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 16,
+                              decoration: infoItem.isCompleted 
+                                  ? TextDecoration.lineThrough 
+                                  : TextDecoration.none,
+                              color: infoItem.isCompleted 
+                                  ? Colors.grey 
+                                  : Colors.black,
                             ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 2),
+                          Row(
+                            children: [
+                              Text(
+                                infoItem.type.displayName,
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  color: Colors.grey.shade600,
+                                ),
+                              ),
+                              if (infoItem.tags.isNotEmpty) ...[
+                                const SizedBox(width: 8),
+                                Text(
+                                  '• ${infoItem.tags.take(2).join(', ')}',
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    color: Colors.grey.shade600,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ],
+                            ],
                           ),
                         ],
                       ),
                     ),
-                    const SizedBox(width: 8),
+                    
+                    // Quick actions
+                    _buildQuickActions(context),
                   ],
-                  
-                  // Link connection indicator
-                  if (infoItem.connectedLink != null) ...[
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: Colors.blue.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(6),
-                        border: Border.all(color: Colors.blue.withOpacity(0.3)),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            infoItem.connectedLink!.isPassword 
-                                ? Icons.lock 
-                                : Icons.link,
-                            size: 12,
-                            color: Colors.blue,
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            'Connected',
-                            style: TextStyle(
-                              fontSize: 11,
-                              color: Colors.blue,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ],
-                      ),
+                ),
+                
+                const SizedBox(height: 8),
+                
+                // Description preview
+                if (infoItem.description.isNotEmpty) ...[
+                  Text(
+                    infoItem.description,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey.shade700,
+                      decoration: infoItem.isCompleted 
+                          ? TextDecoration.lineThrough 
+                          : TextDecoration.none,
                     ),
-                  ],
-                  
-                  const Spacer(),
-                  
-                  // Quick action icons
-                  if (infoItem.connectedLink != null)
-                    IconButton(
-                      icon: Icon(
-                        infoItem.connectedLink!.isPassword 
-                            ? Icons.lock_open 
-                            : Icons.open_in_new,
-                        size: 18,
-                        color: Colors.grey.shade600,
-                      ),
-                      onPressed: () {
-                        // Handle quick access to connected link/password
-                        _handleQuickAccess(context, infoItem.connectedLink!);
-                      },
-                      padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(),
-                    ),
+                  ),
+                  const SizedBox(height: 8),
                 ],
-              ),
-            ],
+                
+                // Metadata footer
+                _buildMetadataFooter(),
+              ],
+            ),
           ),
         ),
       ),
     );
   }
 
-  // ADD THESE METHODS TO FIX THE ERROR:
+  Widget _buildQuickActions(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // Quick link access
+        if (infoItem.connectedLink != null)
+          IconButton(
+            icon: Icon(
+              infoItem.connectedLink!.isPassword 
+                  ? Icons.lock_open 
+                  : Icons.open_in_new,
+              size: 18,
+              color: Colors.grey.shade600,
+            ),
+            onPressed: () => _handleQuickAccess(context, infoItem.connectedLink!),
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(),
+          ),
+        
+        // More options
+        PopupMenuButton<String>(
+          icon: const Icon(Icons.more_vert, size: 18),
+          onSelected: (value) => _handleMenuAction(context, value),
+          itemBuilder: (BuildContext context) => [
+            PopupMenuItem<String>(
+              value: 'edit',
+              child: const Row(
+                children: [
+                  Icon(Icons.edit, size: 18),
+                  SizedBox(width: 8),
+                  Text('Edit'),
+                ],
+              ),
+            ),
+            if (infoItem.connectedLink != null) ...[
+              PopupMenuItem<String>(
+                value: 'copy_link',
+                child: Row(
+                  children: [
+                    const Icon(Icons.copy, size: 18),
+                    const SizedBox(width: 8),
+                    Text(infoItem.connectedLink!.isPassword 
+                        ? 'Copy Password' 
+                        : 'Copy URL'),
+                  ],
+                ),
+              ),
+            ],
+            const PopupMenuItem<String>(
+              value: 'delete',
+              child: Row(
+                children: [
+                  Icon(Icons.delete, color: Colors.red, size: 18),
+                  SizedBox(width: 8),
+                  Text('Delete', style: TextStyle(color: Colors.red)),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMetadataFooter() {
+    return Wrap(
+      spacing: 8,
+      runSpacing: 4,
+      children: [
+        // Deadline
+        if (infoItem.deadline != null)
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+            decoration: BoxDecoration(
+              color: _getDeadlineColor(infoItem.deadline!).withOpacity(0.1),
+              borderRadius: BorderRadius.circular(4),
+              border: Border.all(
+                color: _getDeadlineColor(infoItem.deadline!).withOpacity(0.3),
+              ),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.access_time,
+                  size: 10,
+                  color: _getDeadlineColor(infoItem.deadline!),
+                ),
+                const SizedBox(width: 2),
+                Text(
+                  _formatDeadline(infoItem.deadline!),
+                  style: TextStyle(
+                    fontSize: 10,
+                    color: _getDeadlineColor(infoItem.deadline!),
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        
+        // Priority
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+          decoration: BoxDecoration(
+            color: infoItem.priority.color.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(4),
+            border: Border.all(color: infoItem.priority.color.withOpacity(0.3)),
+          ),
+          child: Text(
+            infoItem.priority.displayName,
+            style: TextStyle(
+              fontSize: 10,
+              color: infoItem.priority.color,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ),
+        
+        // Last edited
+        Text(
+          'Edited ${_formatTimeAgo(infoItem.lastEdited)}',
+          style: TextStyle(
+            fontSize: 10,
+            color: Colors.grey.shade500,
+          ),
+        ),
+      ],
+    );
+  }
+
+  void _handleMenuAction(BuildContext context, String value) {
+    switch (value) {
+      case 'edit':
+        onEdit();
+        break;
+      case 'copy_link':
+        if (infoItem.connectedLink != null) {
+          _copyToClipboard(
+            context, 
+            infoItem.connectedLink!.url, 
+            infoItem.connectedLink!.isPassword ? 'Password' : 'URL'
+          );
+        }
+        break;
+      case 'delete':
+        onDelete();
+        break;
+    }
+  }
+
+  Color _getEmojiColor(InfoType type) {
+    switch (type) {
+      case InfoType.task: return Colors.blue.shade50;
+      case InfoType.reminder: return Colors.orange.shade50;
+      case InfoType.meeting: return Colors.purple.shade50;
+      case InfoType.password: return Colors.red.shade50;
+      case InfoType.link: return Colors.green.shade50;
+      case InfoType.document: return Colors.blueGrey.shade50;
+      case InfoType.idea: return Colors.yellow.shade50;
+      default: return Colors.grey.shade100;
+    }
+  }
 
   void _handleQuickAccess(BuildContext context, Link link) {
     if (link.isPassword) {

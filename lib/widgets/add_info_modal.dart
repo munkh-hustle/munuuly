@@ -4,8 +4,8 @@ import '../models/course.dart';
 import '../models/link.dart';
 
 class AddInfoModal extends StatefulWidget {
-  final Function(String title, String description, String emoji, DateTime? deadline, Link? connectedLink)? onInfoAdded;
-  final Function(String title, String description, String emoji, DateTime? deadline, Link? connectedLink)? onInfoUpdated;
+  final Function(String title, String description, String emoji, DateTime? deadline, Link? connectedLink, InfoType type, Priority priority, List<String> tags)? onInfoAdded;
+  final Function(String title, String description, String emoji, DateTime? deadline, Link? connectedLink, InfoType type, Priority priority, List<String> tags)? onInfoUpdated;
   final InfoItem? existingInfoItem;
   final List<Link> availableLinks;
 
@@ -25,9 +25,13 @@ class _AddInfoModalState extends State<AddInfoModal> {
   final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
+  final _tagsController = TextEditingController();
   String _selectedEmoji = '📝';
   DateTime? _selectedDeadline;
   Link? _selectedLink;
+  InfoType _selectedType = InfoType.note;
+  Priority _selectedPriority = Priority.medium;
+  List<String> _tags = [];
 
   @override
   void initState() {
@@ -38,6 +42,9 @@ class _AddInfoModalState extends State<AddInfoModal> {
       _selectedEmoji = widget.existingInfoItem!.emoji;
       _selectedDeadline = widget.existingInfoItem!.deadline;
       _selectedLink = widget.existingInfoItem!.connectedLink;
+      _selectedType = widget.existingInfoItem!.type;
+      _selectedPriority = widget.existingInfoItem!.priority;
+      _tags = List.from(widget.existingInfoItem!.tags);
     }
   }
 
@@ -61,26 +68,92 @@ class _AddInfoModalState extends State<AddInfoModal> {
             key: _formKey,
             child: Column(
               children: [
-                // Emoji Selection
+                // Type Selection
+                DropdownButtonFormField<InfoType>(
+                  value: _selectedType,
+                  decoration: const InputDecoration(
+                    labelText: 'Type',
+                    border: OutlineInputBorder(),
+                  ),
+                  items: InfoType.values.map((type) {
+                    return DropdownMenuItem(
+                      value: type,
+                      child: Row(
+                        children: [
+                          Text(type.emoji),
+                          const SizedBox(width: 8),
+                          Text(type.displayName),
+                        ],
+                      ),
+                    );
+                  }).toList(),
+                  onChanged: (InfoType? type) {
+                    setState(() {
+                      _selectedType = type ?? InfoType.note;
+                      // Auto-set emoji based on type
+                      _selectedEmoji = type?.emoji ?? '📝';
+                    });
+                  },
+                ),
+                const SizedBox(height: 16),
+
+                // Emoji and Priority in one row
                 Row(
                   children: [
-                    const Text('Emoji: '),
-                    GestureDetector(
-                      onTap: _showEmojiPicker,
-                      child: Container(
-                        width: 40,
-                        height: 40,
-                        decoration: BoxDecoration(
-                          color: Colors.grey.shade100,
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: Colors.grey.shade300),
-                        ),
-                        child: Center(
-                          child: Text(
-                            _selectedEmoji,
-                            style: const TextStyle(fontSize: 16),
+                    // Emoji Selection
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text('Emoji'),
+                          const SizedBox(height: 4),
+                          GestureDetector(
+                            onTap: _showEmojiPicker,
+                            child: Container(
+                              height: 50,
+                              decoration: BoxDecoration(
+                                border: Border.all(color: Colors.grey.shade300),
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: Center(
+                                child: Text(
+                                  _selectedEmoji,
+                                  style: const TextStyle(fontSize: 20),
+                                ),
+                              ),
+                            ),
                           ),
-                        ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    
+                    // Priority Selection
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text('Priority'),
+                          const SizedBox(height: 4),
+                          DropdownButtonFormField<Priority>(
+                            value: _selectedPriority,
+                            decoration: const InputDecoration(
+                              border: OutlineInputBorder(),
+                              isDense: true,
+                            ),
+                            items: Priority.values.map((priority) {
+                              return DropdownMenuItem(
+                                value: priority,
+                                child: Text(priority.displayName),
+                              );
+                            }).toList(),
+                            onChanged: (Priority? priority) {
+                              setState(() {
+                                _selectedPriority = priority ?? Priority.medium;
+                              });
+                            },
+                          ),
+                        ],
                       ),
                     ),
                   ],
@@ -113,6 +186,33 @@ class _AddInfoModalState extends State<AddInfoModal> {
                   maxLines: 3,
                 ),
                 const SizedBox(height: 16),
+                
+                // Tags
+                TextFormField(
+                  controller: _tagsController,
+                  decoration: InputDecoration(
+                    labelText: 'Tags (comma separated)',
+                    border: const OutlineInputBorder(),
+                    suffixIcon: IconButton(
+                      icon: const Icon(Icons.add),
+                      onPressed: _addTag,
+                    ),
+                  ),
+                  onFieldSubmitted: (_) => _addTag(),
+                ),
+                const SizedBox(height: 8),
+                
+                // Display tags
+                if (_tags.isNotEmpty) ...[
+                  Wrap(
+                    spacing: 8,
+                    children: _tags.map((tag) => Chip(
+                      label: Text(tag),
+                      onDeleted: () => _removeTag(tag),
+                    )).toList(),
+                  ),
+                  const SizedBox(height: 16),
+                ],
                 
                 // Deadline Picker
                 Row(
@@ -218,6 +318,51 @@ class _AddInfoModalState extends State<AddInfoModal> {
     );
   }
 
+  void _addTag() {
+    final tag = _tagsController.text.trim();
+    if (tag.isNotEmpty && !_tags.contains(tag)) {
+      setState(() {
+        _tags.add(tag);
+        _tagsController.clear();
+      });
+    }
+  }
+
+  void _removeTag(String tag) {
+    setState(() {
+      _tags.remove(tag);
+    });
+  }
+
+  void _saveInfoItem() {
+    if (_formKey.currentState!.validate()) {
+      if (widget.existingInfoItem != null && widget.onInfoUpdated != null) {
+        widget.onInfoUpdated!(
+          _titleController.text,
+          _descriptionController.text,
+          _selectedEmoji,
+          _selectedDeadline,
+          _selectedLink,
+          _selectedType,
+          _selectedPriority,
+          _tags,
+        );
+      } else if (widget.onInfoAdded != null) {
+        widget.onInfoAdded!(
+          _titleController.text,
+          _descriptionController.text,
+          _selectedEmoji,
+          _selectedDeadline,
+          _selectedLink,
+          _selectedType,
+          _selectedPriority,
+          _tags,
+        );
+      }
+      Navigator.of(context).pop();
+    }
+  }
+
   void _showEmojiPicker() {
     showDialog(
       context: context,
@@ -273,29 +418,6 @@ class _AddInfoModalState extends State<AddInfoModal> {
       setState(() {
         _selectedDeadline = picked;
       });
-    }
-  }
-
-  void _saveInfoItem() {
-    if (_formKey.currentState!.validate()) {
-      if (widget.existingInfoItem != null && widget.onInfoUpdated != null) {
-        widget.onInfoUpdated!(
-          _titleController.text,
-          _descriptionController.text,
-          _selectedEmoji,
-          _selectedDeadline,
-          _selectedLink,
-        );
-      } else if (widget.onInfoAdded != null) {
-        widget.onInfoAdded!(
-          _titleController.text,
-          _descriptionController.text,
-          _selectedEmoji,
-          _selectedDeadline,
-          _selectedLink,
-        );
-      }
-      Navigator.of(context).pop();
     }
   }
 

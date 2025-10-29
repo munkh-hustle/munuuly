@@ -1,4 +1,6 @@
 // course.dart
+import 'package:flutter/material.dart';
+
 import 'link.dart';
 
 class Course {
@@ -64,7 +66,7 @@ class Course {
   }
 }
 
-// New model for info items
+// In course.dart - enhance the InfoItem model
 class InfoItem {
   String id;
   String title;
@@ -73,7 +75,11 @@ class InfoItem {
   DateTime? deadline;
   DateTime createdAt;
   DateTime lastEdited;
-  Link? connectedLink; // Optional connection to a link/password
+  Link? connectedLink;
+  InfoType type; // New: Categorize info items
+  Priority priority; // New: Priority level
+  List<String> tags; // New: For organization
+  bool isCompleted; // New: For task tracking
 
   InfoItem({
     required this.id,
@@ -84,5 +90,37 @@ class InfoItem {
     required this.createdAt,
     required this.lastEdited,
     this.connectedLink,
+    this.type = InfoType.note,
+    this.priority = Priority.medium,
+    this.tags = const [],
+    this.isCompleted = false,
   });
+}
+
+// Add these enums to course.dart
+enum InfoType {
+  note('Note', '📝'),
+  task('Task', '✅'),
+  reminder('Reminder', '⏰'),
+  link('Link', '🔗'),
+  password('Password', '🔐'),
+  meeting('Meeting', '👥'),
+  document('Document', '📄'),
+  idea('Idea', '💡');
+
+  final String displayName;
+  final String emoji;
+
+  const InfoType(this.displayName, this.emoji);
+}
+
+enum Priority {
+  low('Low', Colors.green),
+  medium('Medium', Colors.orange),
+  high('High', Colors.red);
+
+  final String displayName;
+  final Color color;
+
+  const Priority(this.displayName, this.color);
 }

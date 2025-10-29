@@ -228,6 +228,7 @@ Widget _buildLinksTab(Course course) {
 }
 
   // Replace the _buildTodoTab() method in course_detail_screen.dart
+// In course_detail_screen.dart - update the _buildTodoTab method
 Widget _buildTodoTab(Course course) {
   return Padding(
     padding: const EdgeInsets.all(16.0),
@@ -242,7 +243,7 @@ Widget _buildTodoTab(Course course) {
                 context: context,
                 isScrollControlled: true,
                 builder: (context) => AddInfoModal(
-                  onInfoAdded: (title, description, emoji, deadline, connectedLink) {
+                  onInfoAdded: (title, description, emoji, deadline, connectedLink, type, priority, tags) {
                     final courseProvider = Provider.of<CourseProvider>(context, listen: false);
                     final newInfoItem = InfoItem(
                       id: DateTime.now().millisecondsSinceEpoch.toString(),
@@ -253,6 +254,9 @@ Widget _buildTodoTab(Course course) {
                       createdAt: DateTime.now(),
                       lastEdited: DateTime.now(),
                       connectedLink: connectedLink,
+                      type: type,
+                      priority: priority,
+                      tags: tags,
                     );
                     courseProvider.addInfoItemToCourse(course.id, newInfoItem);
                   },
@@ -277,14 +281,14 @@ Widget _buildTodoTab(Course course) {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.info_outline, size: 64, color: Colors.grey),
+                      Icon(Icons.note_add, size: 64, color: Colors.grey),
                       SizedBox(height: 16),
                       Text(
-                        'No info items yet',
+                        'No information yet',
                         style: TextStyle(color: Colors.grey, fontSize: 16),
                       ),
                       Text(
-                        'Add important notes, deadlines, or connected links',
+                        'Add notes, tasks, reminders, or connect links',
                         style: TextStyle(color: Colors.grey, fontSize: 12),
                         textAlign: TextAlign.center,
                       ),
@@ -297,39 +301,43 @@ Widget _buildTodoTab(Course course) {
                     final infoItem = course.infoItems[index];
                     return InfoItemCard(
                       infoItem: infoItem,
-                      onTap: () {
-                        // Show detailed view
-                        _showInfoItemDetail(context, infoItem);
-                      },
+                      onTap: () => _showInfoItemDetail(context, infoItem),
                       onDelete: () {
                         Provider.of<CourseProvider>(context, listen: false)
                             .removeInfoItemFromCourse(course.id, infoItem.id);
                       },
                       onEdit: () {
-  showModalBottomSheet(
-    context: context,
-    isScrollControlled: true,
-    builder: (context) => AddInfoModal(
-      existingInfoItem: infoItem,
-      onInfoUpdated: (title, description, emoji, deadline, connectedLink) {
-        final courseProvider = Provider.of<CourseProvider>(context, listen: false);
-        final updatedInfoItem = InfoItem(
-          id: infoItem.id,
-          title: title,
-          description: description,
-          emoji: emoji,
-          deadline: deadline,
-          createdAt: infoItem.createdAt,
-          lastEdited: DateTime.now(),
-          connectedLink: connectedLink,
-        );
-        courseProvider.updateInfoItemInCourse(course.id, infoItem.id, updatedInfoItem);
-      },
-      availableLinks: course.links,
-      // Remove the onInfoAdded parameter in edit mode
-    ),
-  );
-},
+                        showModalBottomSheet(
+                          context: context,
+                          isScrollControlled: true,
+                          builder: (context) => AddInfoModal(
+                            existingInfoItem: infoItem,
+                            onInfoUpdated: (title, description, emoji, deadline, connectedLink, type, priority, tags) {
+                              final courseProvider = Provider.of<CourseProvider>(context, listen: false);
+                              final updatedInfoItem = InfoItem(
+                                id: infoItem.id,
+                                title: title,
+                                description: description,
+                                emoji: emoji,
+                                deadline: deadline,
+                                createdAt: infoItem.createdAt,
+                                lastEdited: DateTime.now(),
+                                connectedLink: connectedLink,
+                                type: type,
+                                priority: priority,
+                                tags: tags,
+                                isCompleted: infoItem.isCompleted,
+                              );
+                              courseProvider.updateInfoItemInCourse(course.id, infoItem.id, updatedInfoItem);
+                            },
+                            availableLinks: course.links,
+                          ),
+                        );
+                      },
+                      onToggleComplete: () {
+                        Provider.of<CourseProvider>(context, listen: false)
+                            .toggleInfoItemCompletion(course.id, infoItem.id);
+                      },
                     );
                   },
                 ),
