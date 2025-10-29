@@ -229,6 +229,7 @@ Widget _buildLinksTab(Course course) {
 
   // Replace the _buildTodoTab() method in course_detail_screen.dart
 // In course_detail_screen.dart - update the _buildTodoTab method
+// In course_detail_screen.dart - update the _buildTodoTab method
 Widget _buildTodoTab(Course course) {
   return Padding(
     padding: const EdgeInsets.all(16.0),
@@ -243,19 +244,16 @@ Widget _buildTodoTab(Course course) {
                 context: context,
                 isScrollControlled: true,
                 builder: (context) => AddInfoModal(
-                  onInfoAdded: (title, description, emoji, deadline, connectedLink, type, priority, tags) {
+                  onInfoAdded: (title, description, emoji, connectedLink, tags) {
                     final courseProvider = Provider.of<CourseProvider>(context, listen: false);
                     final newInfoItem = InfoItem(
                       id: DateTime.now().millisecondsSinceEpoch.toString(),
                       title: title,
                       description: description,
                       emoji: emoji,
-                      deadline: deadline,
                       createdAt: DateTime.now(),
                       lastEdited: DateTime.now(),
                       connectedLink: connectedLink,
-                      type: type,
-                      priority: priority,
                       tags: tags,
                     );
                     courseProvider.addInfoItemToCourse(course.id, newInfoItem);
@@ -312,31 +310,23 @@ Widget _buildTodoTab(Course course) {
                           isScrollControlled: true,
                           builder: (context) => AddInfoModal(
                             existingInfoItem: infoItem,
-                            onInfoUpdated: (title, description, emoji, deadline, connectedLink, type, priority, tags) {
+                            onInfoUpdated: (title, description, emoji, connectedLink, tags) {
                               final courseProvider = Provider.of<CourseProvider>(context, listen: false);
                               final updatedInfoItem = InfoItem(
                                 id: infoItem.id,
                                 title: title,
                                 description: description,
                                 emoji: emoji,
-                                deadline: deadline,
                                 createdAt: infoItem.createdAt,
                                 lastEdited: DateTime.now(),
                                 connectedLink: connectedLink,
-                                type: type,
-                                priority: priority,
                                 tags: tags,
-                                isCompleted: infoItem.isCompleted,
                               );
                               courseProvider.updateInfoItemInCourse(course.id, infoItem.id, updatedInfoItem);
                             },
                             availableLinks: course.links,
                           ),
                         );
-                      },
-                      onToggleComplete: () {
-                        Provider.of<CourseProvider>(context, listen: false)
-                            .toggleInfoItemCompletion(course.id, infoItem.id);
                       },
                     );
                   },
@@ -347,7 +337,6 @@ Widget _buildTodoTab(Course course) {
   );
 }
 
-// Add this helper method to show detailed view
 void _showInfoItemDetail(BuildContext context, InfoItem infoItem) {
   showDialog(
     context: context,
@@ -370,22 +359,7 @@ void _showInfoItemDetail(BuildContext context, InfoItem infoItem) {
                 style: const TextStyle(fontSize: 14),
               ),
               const SizedBox(height: 16),
-            ],
-            
-            if (infoItem.deadline != null) ...[
-              Row(
-                children: [
-                  const Icon(Icons.access_time, size: 16),
-                  const SizedBox(width: 8),
-                  Text(
-                    'Deadline: ${_formatDate(infoItem.deadline!)}',
-                    style: const TextStyle(fontSize: 14),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-            ],
-            
+            ],            
             if (infoItem.connectedLink != null) ...[
               Row(
                 children: [
@@ -399,6 +373,18 @@ void _showInfoItemDetail(BuildContext context, InfoItem infoItem) {
                     style: const TextStyle(fontSize: 14),
                   ),
                 ],
+              ),
+              const SizedBox(height: 8),
+            ],
+            
+            // Tags display
+            if (infoItem.tags.isNotEmpty) ...[
+              Wrap(
+                spacing: 8,
+                children: infoItem.tags.map((tag) => Chip(
+                  label: Text(tag),
+                  backgroundColor: Colors.grey.shade100,
+                )).toList(),
               ),
               const SizedBox(height: 8),
             ],
@@ -419,10 +405,6 @@ void _showInfoItemDetail(BuildContext context, InfoItem infoItem) {
       ],
     ),
   );
-}
-
-String _formatDate(DateTime date) {
-  return '${date.day}/${date.month}/${date.year}';
 }
 
 String _formatDateTime(DateTime dateTime) {

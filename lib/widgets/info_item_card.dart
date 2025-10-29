@@ -10,7 +10,6 @@ class InfoItemCard extends StatelessWidget {
   final VoidCallback onTap;
   final VoidCallback onDelete;
   final VoidCallback onEdit;
-  final VoidCallback? onToggleComplete;
 
   const InfoItemCard({
     super.key,
@@ -18,7 +17,6 @@ class InfoItemCard extends StatelessWidget {
     required this.onTap,
     required this.onDelete,
     required this.onEdit,
-    this.onToggleComplete,
   });
 
   @override
@@ -29,132 +27,85 @@ class InfoItemCard extends StatelessWidget {
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(12),
-        child: Container(
-          decoration: BoxDecoration(
-            border: Border(
-  left: BorderSide(
-    color: infoItem.priority.color,
-    width: 4,
-  ),
-), 
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Header with emoji, title, and actions
-                Row(
-                  children: [
-                    // Completion checkbox for tasks
-                    if (infoItem.type == InfoType.task) ...[
-                      IconButton(
-                        icon: Icon(
-                          infoItem.isCompleted 
-                              ? Icons.check_circle 
-                              : Icons.radio_button_unchecked,
-                          color: infoItem.isCompleted ? Colors.green : Colors.grey,
-                        ),
-                        onPressed: onToggleComplete,
-                        padding: EdgeInsets.zero,
-                        constraints: const BoxConstraints(),
-                      ),
-                      const SizedBox(width: 8),
-                    ],
-                    
-                    // Emoji container
-                    Container(
-                      width: 32,
-                      height: 32,
-                      decoration: BoxDecoration(
-                        color: _getEmojiColor(infoItem.type),
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: Center(
-                        child: Text(
-                          infoItem.emoji,
-                          style: const TextStyle(fontSize: 14),
-                        ),
-                      ),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Header with emoji, title, and actions
+              Row(
+                children: [
+                  // Emoji container
+                  Container(
+                    width: 32,
+                    height: 32,
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade100,
+                      borderRadius: BorderRadius.circular(6),
                     ),
-                    const SizedBox(width: 12),
-                    
-                    // Title and metadata
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            infoItem.title,
-                            style: TextStyle(
-                              fontWeight: FontWeight.w600,
-                              fontSize: 16,
-                              decoration: infoItem.isCompleted 
-                                  ? TextDecoration.lineThrough 
-                                  : TextDecoration.none,
-                              color: infoItem.isCompleted 
-                                  ? Colors.grey 
-                                  : Colors.black,
-                            ),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          const SizedBox(height: 2),
-                          Row(
-                            children: [
-                              Text(
-                                infoItem.type.displayName,
-                                style: TextStyle(
-                                  fontSize: 11,
-                                  color: Colors.grey.shade600,
-                                ),
-                              ),
-                              if (infoItem.tags.isNotEmpty) ...[
-                                const SizedBox(width: 8),
-                                Text(
-                                  '• ${infoItem.tags.take(2).join(', ')}',
-                                  style: TextStyle(
-                                    fontSize: 11,
-                                    color: Colors.grey.shade600,
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ],
-                            ],
-                          ),
-                        ],
+                    child: Center(
+                      child: Text(
+                        infoItem.emoji,
+                        style: const TextStyle(fontSize: 14),
                       ),
-                    ),
-                    
-                    // Quick actions
-                    _buildQuickActions(context),
-                  ],
-                ),
-                
-                const SizedBox(height: 8),
-                
-                // Description preview
-                if (infoItem.description.isNotEmpty) ...[
-                  Text(
-                    infoItem.description,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey.shade700,
-                      decoration: infoItem.isCompleted 
-                          ? TextDecoration.lineThrough 
-                          : TextDecoration.none,
                     ),
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(width: 12),
+                  
+                  // Title and metadata
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          infoItem.title,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 16,
+                            color: Colors.black,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 2),
+                        if (infoItem.tags.isNotEmpty)
+                          Text(
+                            infoItem.tags.take(2).join(', '),
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: Colors.grey.shade600,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                      ],
+                    ),
+                  ),
+                  
+                  // Quick actions
+                  _buildQuickActions(context),
                 ],
-                
-                // Metadata footer
-                _buildMetadataFooter(),
+              ),
+              
+              const SizedBox(height: 8),
+              
+              // Description preview
+              if (infoItem.description.isNotEmpty) ...[
+                Text(
+                  infoItem.description,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey.shade700,
+                  ),
+                ),
+                const SizedBox(height: 8),
               ],
-            ),
+              
+              // Metadata footer
+              _buildMetadataFooter(),
+            ],
           ),
         ),
       ),
@@ -185,9 +136,9 @@ class InfoItemCard extends StatelessWidget {
           icon: const Icon(Icons.more_vert, size: 18),
           onSelected: (value) => _handleMenuAction(context, value),
           itemBuilder: (BuildContext context) => [
-            PopupMenuItem<String>(
+            const PopupMenuItem<String>(
               value: 'edit',
-              child: const Row(
+              child: Row(
                 children: [
                   Icon(Icons.edit, size: 18),
                   SizedBox(width: 8),
@@ -230,55 +181,37 @@ class InfoItemCard extends StatelessWidget {
       spacing: 8,
       runSpacing: 4,
       children: [
-        // Deadline
-        if (infoItem.deadline != null)
+        // Connected link indicator
+        if (infoItem.connectedLink != null)
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
             decoration: BoxDecoration(
-              color: _getDeadlineColor(infoItem.deadline!).withOpacity(0.1),
+              color: Colors.blue.shade50,
               borderRadius: BorderRadius.circular(4),
-              border: Border.all(
-                color: _getDeadlineColor(infoItem.deadline!).withOpacity(0.3),
-              ),
+              border: Border.all(color: Colors.blue.shade200),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Icon(
-                  Icons.access_time,
+                  infoItem.connectedLink!.isPassword ? Icons.lock : Icons.link,
                   size: 10,
-                  color: _getDeadlineColor(infoItem.deadline!),
+                  color: Colors.blue,
                 ),
                 const SizedBox(width: 2),
                 Text(
-                  _formatDeadline(infoItem.deadline!),
-                  style: TextStyle(
+                  infoItem.connectedLink!.title,
+                  style: const TextStyle(
                     fontSize: 10,
-                    color: _getDeadlineColor(infoItem.deadline!),
+                    color: Colors.blue,
                     fontWeight: FontWeight.w500,
                   ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),
           ),
-        
-        // Priority
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-          decoration: BoxDecoration(
-            color: infoItem.priority.color.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(4),
-            border: Border.all(color: infoItem.priority.color.withOpacity(0.3)),
-          ),
-          child: Text(
-            infoItem.priority.displayName,
-            style: TextStyle(
-              fontSize: 10,
-              color: infoItem.priority.color,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ),
         
         // Last edited
         Text(
@@ -309,19 +242,6 @@ class InfoItemCard extends StatelessWidget {
       case 'delete':
         onDelete();
         break;
-    }
-  }
-
-  Color _getEmojiColor(InfoType type) {
-    switch (type) {
-      case InfoType.task: return Colors.blue.shade50;
-      case InfoType.reminder: return Colors.orange.shade50;
-      case InfoType.meeting: return Colors.purple.shade50;
-      case InfoType.password: return Colors.red.shade50;
-      case InfoType.link: return Colors.green.shade50;
-      case InfoType.document: return Colors.blueGrey.shade50;
-      case InfoType.idea: return Colors.yellow.shade50;
-      default: return Colors.grey.shade100;
     }
   }
 
@@ -395,39 +315,7 @@ class InfoItemCard extends StatelessWidget {
     
     return '${dateTime.day}/${dateTime.month}/${dateTime.year}';
   }
-
-  Color _getDeadlineColor(DateTime deadline) {
-    final now = DateTime.now();
-    final difference = deadline.difference(now);
-    
-    if (difference.inDays < 0) {
-      return Colors.red; // Overdue
-    } else if (difference.inDays <= 1) {
-      return Colors.orange; // Due today or tomorrow
-    } else if (difference.inDays <= 3) {
-      return Colors.amber; // Due in 2-3 days
-    } else {
-      return Colors.green; // Due in more than 3 days
-    }
-  }
-
-  String _formatDeadline(DateTime deadline) {
-    final now = DateTime.now();
-    final difference = deadline.difference(now);
-    
-    if (difference.inDays < 0) {
-      return 'Overdue by ${-difference.inDays} days';
-    } else if (difference.inDays == 0) {
-      return 'Due today';
-    } else if (difference.inDays == 1) {
-      return 'Due tomorrow';
-    } else {
-      return 'Due in ${difference.inDays} days';
-    }
-  }
 }
-
-// ADD THIS HELPER WIDGET OUTSIDE THE MAIN CLASS:
 
 // Helper widget for copyable fields
 class _CopyableField extends StatelessWidget {

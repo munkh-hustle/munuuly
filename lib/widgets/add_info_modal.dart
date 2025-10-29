@@ -4,8 +4,8 @@ import '../models/course.dart';
 import '../models/link.dart';
 
 class AddInfoModal extends StatefulWidget {
-  final Function(String title, String description, String emoji, DateTime? deadline, Link? connectedLink, InfoType type, Priority priority, List<String> tags)? onInfoAdded;
-  final Function(String title, String description, String emoji, DateTime? deadline, Link? connectedLink, InfoType type, Priority priority, List<String> tags)? onInfoUpdated;
+  final Function(String title, String description, String emoji, Link? connectedLink, List<String> tags)? onInfoAdded;
+  final Function(String title, String description, String emoji, Link? connectedLink, List<String> tags)? onInfoUpdated;
   final InfoItem? existingInfoItem;
   final List<Link> availableLinks;
 
@@ -27,10 +27,7 @@ class _AddInfoModalState extends State<AddInfoModal> {
   final _descriptionController = TextEditingController();
   final _tagsController = TextEditingController();
   String _selectedEmoji = '📝';
-  DateTime? _selectedDeadline;
   Link? _selectedLink;
-  InfoType _selectedType = InfoType.note;
-  Priority _selectedPriority = Priority.medium;
   List<String> _tags = [];
 
   @override
@@ -40,10 +37,7 @@ class _AddInfoModalState extends State<AddInfoModal> {
       _titleController.text = widget.existingInfoItem!.title;
       _descriptionController.text = widget.existingInfoItem!.description;
       _selectedEmoji = widget.existingInfoItem!.emoji;
-      _selectedDeadline = widget.existingInfoItem!.deadline;
       _selectedLink = widget.existingInfoItem!.connectedLink;
-      _selectedType = widget.existingInfoItem!.type;
-      _selectedPriority = widget.existingInfoItem!.priority;
       _tags = List.from(widget.existingInfoItem!.tags);
     }
   }
@@ -68,92 +62,26 @@ class _AddInfoModalState extends State<AddInfoModal> {
             key: _formKey,
             child: Column(
               children: [
-                // Type Selection
-                DropdownButtonFormField<InfoType>(
-                  value: _selectedType,
-                  decoration: const InputDecoration(
-                    labelText: 'Type',
-                    border: OutlineInputBorder(),
-                  ),
-                  items: InfoType.values.map((type) {
-                    return DropdownMenuItem(
-                      value: type,
-                      child: Row(
-                        children: [
-                          Text(type.emoji),
-                          const SizedBox(width: 8),
-                          Text(type.displayName),
-                        ],
-                      ),
-                    );
-                  }).toList(),
-                  onChanged: (InfoType? type) {
-                    setState(() {
-                      _selectedType = type ?? InfoType.note;
-                      // Auto-set emoji based on type
-                      _selectedEmoji = type?.emoji ?? '📝';
-                    });
-                  },
-                ),
-                const SizedBox(height: 16),
-
-                // Emoji and Priority in one row
-                Row(
+                // Emoji Selection
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Emoji Selection
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text('Emoji'),
-                          const SizedBox(height: 4),
-                          GestureDetector(
-                            onTap: _showEmojiPicker,
-                            child: Container(
-                              height: 50,
-                              decoration: BoxDecoration(
-                                border: Border.all(color: Colors.grey.shade300),
-                                borderRadius: BorderRadius.circular(4),
-                              ),
-                              child: Center(
-                                child: Text(
-                                  _selectedEmoji,
-                                  style: const TextStyle(fontSize: 20),
-                                ),
-                              ),
-                            ),
+                    const Text('Emoji'),
+                    const SizedBox(height: 4),
+                    GestureDetector(
+                      onTap: _showEmojiPicker,
+                      child: Container(
+                        height: 50,
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.grey.shade300),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Center(
+                          child: Text(
+                            _selectedEmoji,
+                            style: const TextStyle(fontSize: 20),
                           ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    
-                    // Priority Selection
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text('Priority'),
-                          const SizedBox(height: 4),
-                          DropdownButtonFormField<Priority>(
-                            value: _selectedPriority,
-                            decoration: const InputDecoration(
-                              border: OutlineInputBorder(),
-                              isDense: true,
-                            ),
-                            items: Priority.values.map((priority) {
-                              return DropdownMenuItem(
-                                value: priority,
-                                child: Text(priority.displayName),
-                              );
-                            }).toList(),
-                            onChanged: (Priority? priority) {
-                              setState(() {
-                                _selectedPriority = priority ?? Priority.medium;
-                              });
-                            },
-                          ),
-                        ],
+                        ),
                       ),
                     ),
                   ],
@@ -213,38 +141,6 @@ class _AddInfoModalState extends State<AddInfoModal> {
                   ),
                   const SizedBox(height: 16),
                 ],
-                
-                // Deadline Picker
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        _selectedDeadline == null
-                            ? 'No deadline set'
-                            : 'Deadline: ${_formatDate(_selectedDeadline!)}',
-                        style: TextStyle(
-                          color: _selectedDeadline == null 
-                              ? Colors.grey 
-                              : Colors.black,
-                        ),
-                      ),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.calendar_today),
-                      onPressed: _pickDeadline,
-                    ),
-                    if (_selectedDeadline != null)
-                      IconButton(
-                        icon: const Icon(Icons.clear, color: Colors.red),
-                        onPressed: () {
-                          setState(() {
-                            _selectedDeadline = null;
-                          });
-                        },
-                      ),
-                  ],
-                ),
-                const SizedBox(height: 16),
                 
                 // Link Connection
                 if (widget.availableLinks.isNotEmpty) ...[
@@ -341,10 +237,7 @@ class _AddInfoModalState extends State<AddInfoModal> {
           _titleController.text,
           _descriptionController.text,
           _selectedEmoji,
-          _selectedDeadline,
           _selectedLink,
-          _selectedType,
-          _selectedPriority,
           _tags,
         );
       } else if (widget.onInfoAdded != null) {
@@ -352,10 +245,7 @@ class _AddInfoModalState extends State<AddInfoModal> {
           _titleController.text,
           _descriptionController.text,
           _selectedEmoji,
-          _selectedDeadline,
           _selectedLink,
-          _selectedType,
-          _selectedPriority,
           _tags,
         );
       }
@@ -404,25 +294,6 @@ class _AddInfoModalState extends State<AddInfoModal> {
         ),
       ),
     );
-  }
-
-  Future<void> _pickDeadline() async {
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime.now(),
-      lastDate: DateTime(2100),
-    );
-    
-    if (picked != null) {
-      setState(() {
-        _selectedDeadline = picked;
-      });
-    }
-  }
-
-  String _formatDate(DateTime date) {
-    return '${date.day}/${date.month}/${date.year}';
   }
 
   final List<String> _commonEmojis = [
