@@ -81,7 +81,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> with SingleTick
                   tabs: const [
                     Tab(text: 'Info'),
                     Tab(text: 'Files'),
-                    Tab(text: 'Study Sets'),
+                    Tab(text: 'Sets'),
                     Tab(text: 'Links'),
                   ],
                 ),
