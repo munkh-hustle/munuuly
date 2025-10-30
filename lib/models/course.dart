@@ -1,6 +1,4 @@
 // course.dart
-import 'package:flutter/material.dart';
-
 import 'link.dart';
 
 class Course {
