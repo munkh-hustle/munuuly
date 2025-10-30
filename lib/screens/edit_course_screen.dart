@@ -17,7 +17,7 @@ class _EditCourseScreenState extends State<EditCourseScreen> {
   final _nameController = TextEditingController();
   final _instructorController = TextEditingController();
   final _roomController = TextEditingController();
-  
+
   Color _selectedColor = Colors.pink;
   String _selectedEmoji = '📚'; // Default emoji
   final List<Color> _defaultColors = [
@@ -88,13 +88,10 @@ class _EditCourseScreenState extends State<EditCourseScreen> {
               const SizedBox(height: 8),
               Text(
                 'Tap to change emoji',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.grey.shade600,
-                ),
+                style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
               ),
               const SizedBox(height: 16),
-              
+
               // Folder Name Field
               TextFormField(
                 controller: _nameController,
@@ -110,7 +107,7 @@ class _EditCourseScreenState extends State<EditCourseScreen> {
                 },
               ),
               const SizedBox(height: 16),
-              
+
               // Description Field
               TextFormField(
                 controller: _instructorController,
@@ -120,7 +117,7 @@ class _EditCourseScreenState extends State<EditCourseScreen> {
                 ),
               ),
               const SizedBox(height: 16),
-              
+
               // Room Location Field
               TextFormField(
                 controller: _roomController,
@@ -130,20 +127,17 @@ class _EditCourseScreenState extends State<EditCourseScreen> {
                 ),
               ),
               const SizedBox(height: 24),
-              
+
               // Color Selection Section
               const Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
                   'Select Color:',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                  ),
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
                 ),
               ),
               const SizedBox(height: 12),
-              
+
               // Color Picker - Horizontal Row
               SizedBox(
                 height: 50,
@@ -151,21 +145,24 @@ class _EditCourseScreenState extends State<EditCourseScreen> {
                   scrollDirection: Axis.horizontal,
                   children: [
                     // Default Colors
-                    ..._defaultColors.map((color) => _ColorCircle(
-                      color: color,
-                      isSelected: _selectedColor == color,
-                      onTap: () => setState(() => _selectedColor = color),
-                    )),
-                    
+                    ..._defaultColors.map(
+                      (color) => _ColorCircle(
+                        color: color,
+                        isSelected: _selectedColor == color,
+                        onTap: () => setState(() => _selectedColor = color),
+                      ),
+                    ),
+
                     // Custom Color Picker
                     _CustomColorPicker(
-                      onColorPicked: (color) => setState(() => _selectedColor = color),
+                      onColorPicked: (color) =>
+                          setState(() => _selectedColor = color),
                     ),
                   ],
                 ),
               ),
               const Spacer(),
-              
+
               // Save Button
               SizedBox(
                 width: double.infinity,
@@ -203,9 +200,14 @@ class _EditCourseScreenState extends State<EditCourseScreen> {
 
   void _saveCourse() {
     if (_formKey.currentState!.validate()) {
-      final courseProvider = Provider.of<CourseProvider>(context, listen: false);
+      final courseProvider = Provider.of<CourseProvider>(
+        context,
+        listen: false,
+      );
       final course = Course(
-        id: widget.course?.id ?? DateTime.now().millisecondsSinceEpoch.toString(),
+        id:
+            widget.course?.id ??
+            DateTime.now().millisecondsSinceEpoch.toString(),
         name: _nameController.text,
         instructor: _instructorController.text,
         roomLocation: _roomController.text,
@@ -226,39 +228,47 @@ class _EditCourseScreenState extends State<EditCourseScreen> {
   }
 
   Color _getColorFromString(String colorString) {
-  switch (colorString) {
-    case 'pink': return Colors.pink;
-    case 'blue': return Colors.blue;
-    case 'green': return Colors.green;
-    case 'purple': return Colors.purple;
-    case 'orange': return Colors.orange;
-    case 'red': return Colors.red;
-    case 'teal': return Colors.teal;
-    case 'indigo': return Colors.indigo;
-    default: 
-      // Try to parse as hex for custom colors
-      try {
-        return Color(int.parse(colorString, radix: 16));
-      } catch (e) {
+    switch (colorString) {
+      case 'pink':
         return Colors.pink;
-      }
+      case 'blue':
+        return Colors.blue;
+      case 'green':
+        return Colors.green;
+      case 'purple':
+        return Colors.purple;
+      case 'orange':
+        return Colors.orange;
+      case 'red':
+        return Colors.red;
+      case 'teal':
+        return Colors.teal;
+      case 'indigo':
+        return Colors.indigo;
+      default:
+        // Try to parse as hex for custom colors
+        try {
+          return Color(int.parse(colorString, radix: 16));
+        } catch (e) {
+          return Colors.pink;
+        }
+    }
   }
-}
 
   String _colorToString(Color color) {
-  // For default colors, use names
-  if (color == Colors.pink) return 'pink';
-  if (color == Colors.blue) return 'blue';
-  if (color == Colors.green) return 'green';
-  if (color == Colors.purple) return 'purple';
-  if (color == Colors.orange) return 'orange';
-  if (color == Colors.red) return 'red';
-  if (color == Colors.teal) return 'teal';
-  if (color == Colors.indigo) return 'indigo';
-  
-  // For custom colors, store the hex value
-  return color.value.toRadixString(16);
-}
+    // For default colors, use names
+    if (color == Colors.pink) return 'pink';
+    if (color == Colors.blue) return 'blue';
+    if (color == Colors.green) return 'green';
+    if (color == Colors.purple) return 'purple';
+    if (color == Colors.orange) return 'orange';
+    if (color == Colors.red) return 'red';
+    if (color == Colors.teal) return 'teal';
+    if (color == Colors.indigo) return 'indigo';
+
+    // For custom colors, store the hex value
+    return color.value.toRadixString(16);
+  }
 }
 
 // Simple Emoji Picker Dialog that uses native keyboard
@@ -303,7 +313,7 @@ class _EmojiPickerDialogState extends State<EmojiPickerDialog> {
               ),
             ),
             const SizedBox(height: 16),
-            
+
             // Current Selection Preview
             Container(
               width: 80,
@@ -320,7 +330,7 @@ class _EmojiPickerDialogState extends State<EmojiPickerDialog> {
               ),
             ),
             const SizedBox(height: 16),
-            
+
             // Emoji Input Field
             TextField(
               controller: _emojiController,
@@ -335,7 +345,7 @@ class _EmojiPickerDialogState extends State<EmojiPickerDialog> {
               textInputAction: TextInputAction.done,
             ),
             const SizedBox(height: 20),
-            
+
             // Action Buttons
             Row(
               children: [
@@ -442,10 +452,7 @@ class _CustomColorPicker extends StatelessWidget {
             shape: BoxShape.circle,
             border: Border.all(color: Colors.grey.shade400),
           ),
-          child: const Icon(
-            Icons.add,
-            color: Colors.grey,
-          ),
+          child: const Icon(Icons.add, color: Colors.grey),
         ),
       ),
     );
@@ -487,25 +494,101 @@ class ColorPickerGrid extends StatefulWidget {
 
 class _ColorPickerGridState extends State<ColorPickerGrid> {
   final List<Color> _customColors = [
-    Colors.red[100]!, Colors.red[300]!, Colors.red[500]!, Colors.red[700]!, Colors.red[900]!,
-    Colors.pink[100]!, Colors.pink[300]!, Colors.pink[500]!, Colors.pink[700]!, Colors.pink[900]!,
-    Colors.purple[100]!, Colors.purple[300]!, Colors.purple[500]!, Colors.purple[700]!, Colors.purple[900]!,
-    Colors.deepPurple[100]!, Colors.deepPurple[300]!, Colors.deepPurple[500]!, Colors.deepPurple[700]!, Colors.deepPurple[900]!,
-    Colors.indigo[100]!, Colors.indigo[300]!, Colors.indigo[500]!, Colors.indigo[700]!, Colors.indigo[900]!,
-    Colors.blue[100]!, Colors.blue[300]!, Colors.blue[500]!, Colors.blue[700]!, Colors.blue[900]!,
-    Colors.lightBlue[100]!, Colors.lightBlue[300]!, Colors.lightBlue[500]!, Colors.lightBlue[700]!, Colors.lightBlue[900]!,
-    Colors.cyan[100]!, Colors.cyan[300]!, Colors.cyan[500]!, Colors.cyan[700]!, Colors.cyan[900]!,
-    Colors.teal[100]!, Colors.teal[300]!, Colors.teal[500]!, Colors.teal[700]!, Colors.teal[900]!,
-    Colors.green[100]!, Colors.green[300]!, Colors.green[500]!, Colors.green[700]!, Colors.green[900]!,
-    Colors.lightGreen[100]!, Colors.lightGreen[300]!, Colors.lightGreen[500]!, Colors.lightGreen[700]!, Colors.lightGreen[900]!,
-    Colors.lime[100]!, Colors.lime[300]!, Colors.lime[500]!, Colors.lime[700]!, Colors.lime[900]!,
-    Colors.yellow[100]!, Colors.yellow[300]!, Colors.yellow[500]!, Colors.yellow[700]!, Colors.yellow[900]!,
-    Colors.amber[100]!, Colors.amber[300]!, Colors.amber[500]!, Colors.amber[700]!, Colors.amber[900]!,
-    Colors.orange[100]!, Colors.orange[300]!, Colors.orange[500]!, Colors.orange[700]!, Colors.orange[900]!,
-    Colors.deepOrange[100]!, Colors.deepOrange[300]!, Colors.deepOrange[500]!, Colors.deepOrange[700]!, Colors.deepOrange[900]!,
-    Colors.brown[100]!, Colors.brown[300]!, Colors.brown[500]!, Colors.brown[700]!, Colors.brown[900]!,
-    Colors.grey[100]!, Colors.grey[300]!, Colors.grey[500]!, Colors.grey[700]!, Colors.grey[900]!,
-    Colors.blueGrey[100]!, Colors.blueGrey[300]!, Colors.blueGrey[500]!, Colors.blueGrey[700]!, Colors.blueGrey[900]!,
+    Colors.red[100]!,
+    Colors.red[300]!,
+    Colors.red[500]!,
+    Colors.red[700]!,
+    Colors.red[900]!,
+    Colors.pink[100]!,
+    Colors.pink[300]!,
+    Colors.pink[500]!,
+    Colors.pink[700]!,
+    Colors.pink[900]!,
+    Colors.purple[100]!,
+    Colors.purple[300]!,
+    Colors.purple[500]!,
+    Colors.purple[700]!,
+    Colors.purple[900]!,
+    Colors.deepPurple[100]!,
+    Colors.deepPurple[300]!,
+    Colors.deepPurple[500]!,
+    Colors.deepPurple[700]!,
+    Colors.deepPurple[900]!,
+    Colors.indigo[100]!,
+    Colors.indigo[300]!,
+    Colors.indigo[500]!,
+    Colors.indigo[700]!,
+    Colors.indigo[900]!,
+    Colors.blue[100]!,
+    Colors.blue[300]!,
+    Colors.blue[500]!,
+    Colors.blue[700]!,
+    Colors.blue[900]!,
+    Colors.lightBlue[100]!,
+    Colors.lightBlue[300]!,
+    Colors.lightBlue[500]!,
+    Colors.lightBlue[700]!,
+    Colors.lightBlue[900]!,
+    Colors.cyan[100]!,
+    Colors.cyan[300]!,
+    Colors.cyan[500]!,
+    Colors.cyan[700]!,
+    Colors.cyan[900]!,
+    Colors.teal[100]!,
+    Colors.teal[300]!,
+    Colors.teal[500]!,
+    Colors.teal[700]!,
+    Colors.teal[900]!,
+    Colors.green[100]!,
+    Colors.green[300]!,
+    Colors.green[500]!,
+    Colors.green[700]!,
+    Colors.green[900]!,
+    Colors.lightGreen[100]!,
+    Colors.lightGreen[300]!,
+    Colors.lightGreen[500]!,
+    Colors.lightGreen[700]!,
+    Colors.lightGreen[900]!,
+    Colors.lime[100]!,
+    Colors.lime[300]!,
+    Colors.lime[500]!,
+    Colors.lime[700]!,
+    Colors.lime[900]!,
+    Colors.yellow[100]!,
+    Colors.yellow[300]!,
+    Colors.yellow[500]!,
+    Colors.yellow[700]!,
+    Colors.yellow[900]!,
+    Colors.amber[100]!,
+    Colors.amber[300]!,
+    Colors.amber[500]!,
+    Colors.amber[700]!,
+    Colors.amber[900]!,
+    Colors.orange[100]!,
+    Colors.orange[300]!,
+    Colors.orange[500]!,
+    Colors.orange[700]!,
+    Colors.orange[900]!,
+    Colors.deepOrange[100]!,
+    Colors.deepOrange[300]!,
+    Colors.deepOrange[500]!,
+    Colors.deepOrange[700]!,
+    Colors.deepOrange[900]!,
+    Colors.brown[100]!,
+    Colors.brown[300]!,
+    Colors.brown[500]!,
+    Colors.brown[700]!,
+    Colors.brown[900]!,
+    Colors.grey[100]!,
+    Colors.grey[300]!,
+    Colors.grey[500]!,
+    Colors.grey[700]!,
+    Colors.grey[900]!,
+    Colors.blueGrey[100]!,
+    Colors.blueGrey[300]!,
+    Colors.blueGrey[500]!,
+    Colors.blueGrey[700]!,
+    Colors.blueGrey[900]!,
   ];
 
   @override

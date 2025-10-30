@@ -5,11 +5,7 @@ class CourseCard extends StatelessWidget {
   final Course course;
   final VoidCallback onTap;
 
-  const CourseCard({
-    super.key,
-    required this.course,
-    required this.onTap,
-  });
+  const CourseCard({super.key, required this.course, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -69,21 +65,31 @@ class CourseCard extends StatelessWidget {
       final colorValue = int.parse(hexString, radix: 16);
       return Color(colorValue);
     }
-    
+
     // Handle named colors
     switch (colorString) {
-      case 'pink': return Colors.pink;
-      case 'blue': return Colors.blue;
-      case 'green': return Colors.green;
-      case 'purple': return Colors.purple;
-      case 'orange': return Colors.orange;
-      case 'red': return Colors.red;
-      case 'teal': return Colors.teal;
-      case 'indigo': return Colors.indigo;
-      default: 
+      case 'pink':
+        return Colors.pink;
+      case 'blue':
+        return Colors.blue;
+      case 'green':
+        return Colors.green;
+      case 'purple':
+        return Colors.purple;
+      case 'orange':
+        return Colors.orange;
+      case 'red':
+        return Colors.red;
+      case 'teal':
+        return Colors.teal;
+      case 'indigo':
+        return Colors.indigo;
+      default:
         // Try to parse as hex if it's not a named color
         try {
-          return Color(int.parse(colorString.replaceFirst('0x', ''), radix: 16));
+          return Color(
+            int.parse(colorString.replaceFirst('0x', ''), radix: 16),
+          );
         } catch (e) {
           return Colors.grey;
         }

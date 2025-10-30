@@ -35,7 +35,8 @@ class LinkItem extends StatelessWidget {
             if (link.isPassword)
               IconButton(
                 icon: const Icon(Icons.copy, size: 18),
-                onPressed: () => _copyToClipboard(context, link.title, 'Username'),
+                onPressed: () =>
+                    _copyToClipboard(context, link.title, 'Username'),
                 padding: EdgeInsets.zero,
                 constraints: const BoxConstraints(),
               ),
@@ -46,16 +47,14 @@ class LinkItem extends StatelessWidget {
             Expanded(
               child: Text(
                 link.isPassword ? '••••••••' : link.url,
-                style: TextStyle(
-                  color: Colors.grey.shade600,
-                  fontSize: 12,
-                ),
+                style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
               ),
             ),
             if (link.isPassword)
               IconButton(
                 icon: const Icon(Icons.copy, size: 18),
-                onPressed: () => _copyToClipboard(context, link.url, 'Password'),
+                onPressed: () =>
+                    _copyToClipboard(context, link.url, 'Password'),
                 padding: EdgeInsets.zero,
                 constraints: const BoxConstraints(),
               ),
@@ -72,7 +71,11 @@ class LinkItem extends StatelessWidget {
                 _copyToClipboard(context, link.title, 'Username');
                 break;
               case 'copy_url':
-                _copyToClipboard(context, link.url, link.isPassword ? 'Password' : 'URL');
+                _copyToClipboard(
+                  context,
+                  link.url,
+                  link.isPassword ? 'Password' : 'URL',
+                );
                 break;
               case 'delete':
                 onDelete();
@@ -146,7 +149,10 @@ class LinkItem extends StatelessWidget {
           children: [
             Row(
               children: [
-                const Text('Username: ', style: TextStyle(fontWeight: FontWeight.bold)),
+                const Text(
+                  'Username: ',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
                 Expanded(child: Text(link.title)),
                 IconButton(
                   icon: const Icon(Icons.copy),
@@ -160,7 +166,10 @@ class LinkItem extends StatelessWidget {
             const SizedBox(height: 12),
             Row(
               children: [
-                const Text('Password: ', style: TextStyle(fontWeight: FontWeight.bold)),
+                const Text(
+                  'Password: ',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
                 Expanded(child: Text(link.url)),
                 IconButton(
                   icon: const Icon(Icons.copy),

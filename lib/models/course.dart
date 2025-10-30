@@ -28,8 +28,8 @@ class Course {
     this.description,
     List<Link>? links,
     List<InfoItem>? infoItems,
-  })  : links = links ?? [],
-        infoItems = infoItems ?? [];
+  }) : links = links ?? [],
+       infoItems = infoItems ?? [];
 
   String get initials => name.isNotEmpty ? name[0].toUpperCase() : '';
 

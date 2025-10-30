@@ -51,7 +51,7 @@ class InfoItemCard extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: 12),
-                  
+
                   // Title and metadata
                   Expanded(
                     child: Column(
@@ -81,28 +81,25 @@ class InfoItemCard extends StatelessWidget {
                       ],
                     ),
                   ),
-                  
+
                   // Quick actions
                   _buildQuickActions(context),
                 ],
               ),
-              
+
               const SizedBox(height: 8),
-              
+
               // Description preview
               if (infoItem.description.isNotEmpty) ...[
                 Text(
                   infoItem.description,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey.shade700,
-                  ),
+                  style: TextStyle(fontSize: 14, color: Colors.grey.shade700),
                 ),
                 const SizedBox(height: 8),
               ],
-              
+
               // Metadata footer
               _buildMetadataFooter(),
             ],
@@ -113,198 +110,197 @@ class InfoItemCard extends StatelessWidget {
   }
 
   Widget _buildQuickActions(BuildContext context) {
-  return Row(
-    mainAxisSize: MainAxisSize.min,
-    children: [
-      // Quick access to first link if available
-      if (infoItem.connectedLinks.isNotEmpty)
-        IconButton(
-          icon: Icon(
-            infoItem.connectedLinks.first.isPassword 
-                ? Icons.lock_open 
-                : Icons.open_in_new,
-            size: 18,
-            color: Colors.grey.shade600,
-          ),
-          onPressed: () => _handleQuickAccess(context, infoItem.connectedLinks.first),
-          padding: EdgeInsets.zero,
-          constraints: const BoxConstraints(),
-        ),
-      
-      // More options
-      PopupMenuButton<String>(
-        icon: const Icon(Icons.more_vert, size: 18),
-        onSelected: (value) => _handleMenuAction(context, value),
-        itemBuilder: (BuildContext context) => [
-          const PopupMenuItem<String>(
-            value: 'edit',
-            child: Row(
-              children: [
-                Icon(Icons.edit, size: 18),
-                SizedBox(width: 8),
-                Text('Edit'),
-              ],
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // Quick access to first link if available
+        if (infoItem.connectedLinks.isNotEmpty)
+          IconButton(
+            icon: Icon(
+              infoItem.connectedLinks.first.isPassword
+                  ? Icons.lock_open
+                  : Icons.open_in_new,
+              size: 18,
+              color: Colors.grey.shade600,
             ),
+            onPressed: () =>
+                _handleQuickAccess(context, infoItem.connectedLinks.first),
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(),
           ),
-          if (infoItem.connectedLinks.isNotEmpty) ...[
+
+        // More options
+        PopupMenuButton<String>(
+          icon: const Icon(Icons.more_vert, size: 18),
+          onSelected: (value) => _handleMenuAction(context, value),
+          itemBuilder: (BuildContext context) => [
             const PopupMenuItem<String>(
-              value: 'show_links',
+              value: 'edit',
               child: Row(
                 children: [
-                  Icon(Icons.link, size: 18),
+                  Icon(Icons.edit, size: 18),
                   SizedBox(width: 8),
-                  Text('Show All Links'),
+                  Text('Edit'),
+                ],
+              ),
+            ),
+            if (infoItem.connectedLinks.isNotEmpty) ...[
+              const PopupMenuItem<String>(
+                value: 'show_links',
+                child: Row(
+                  children: [
+                    Icon(Icons.link, size: 18),
+                    SizedBox(width: 8),
+                    Text('Show All Links'),
+                  ],
+                ),
+              ),
+            ],
+            const PopupMenuItem<String>(
+              value: 'delete',
+              child: Row(
+                children: [
+                  Icon(Icons.delete, color: Colors.red, size: 18),
+                  SizedBox(width: 8),
+                  Text('Delete', style: TextStyle(color: Colors.red)),
                 ],
               ),
             ),
           ],
-          const PopupMenuItem<String>(
-            value: 'delete',
-            child: Row(
-              children: [
-                Icon(Icons.delete, color: Colors.red, size: 18),
-                SizedBox(width: 8),
-                Text('Delete', style: TextStyle(color: Colors.red)),
-              ],
-            ),
+        ),
+      ],
+    );
+  }
+
+  // Add method to show all links
+  void _handleMenuAction(BuildContext context, String value) {
+    switch (value) {
+      case 'edit':
+        onEdit();
+        break;
+      case 'show_links':
+        _showAllLinksDialog(context);
+        break;
+      case 'delete':
+        onDelete();
+        break;
+    }
+  }
+
+  void _showAllLinksDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Connected Links'),
+        content: SizedBox(
+          width: double.maxFinite,
+          child: ListView.builder(
+            shrinkWrap: true,
+            itemCount: infoItem.connectedLinks.length,
+            itemBuilder: (context, index) {
+              final link = infoItem.connectedLinks[index];
+              return ListTile(
+                leading: Icon(link.isPassword ? Icons.lock : Icons.link),
+                title: Text(link.title),
+                subtitle: Text(link.isPassword ? '••••••••' : link.url),
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.copy, size: 16),
+                      onPressed: () => _copyToClipboard(
+                        context,
+                        link.isPassword ? link.url : link.title,
+                        link.isPassword ? 'Password' : 'Title',
+                      ),
+                    ),
+                    if (!link.isPassword)
+                      IconButton(
+                        icon: const Icon(Icons.open_in_new, size: 16),
+                        onPressed: () => _launchURL(context, link.url),
+                      ),
+                  ],
+                ),
+              );
+            },
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Close'),
           ),
         ],
       ),
-    ],
-  );
-}
-
-// Add method to show all links
-void _handleMenuAction(BuildContext context, String value) {
-  switch (value) {
-    case 'edit':
-      onEdit();
-      break;
-    case 'show_links':
-      _showAllLinksDialog(context);
-      break;
-    case 'delete':
-      onDelete();
-      break;
+    );
   }
-}
 
-void _showAllLinksDialog(BuildContext context) {
-  showDialog(
-    context: context,
-    builder: (context) => AlertDialog(
-      title: const Text('Connected Links'),
-      content: SizedBox(
-        width: double.maxFinite,
-        child: ListView.builder(
-          shrinkWrap: true,
-          itemCount: infoItem.connectedLinks.length,
-          itemBuilder: (context, index) {
-            final link = infoItem.connectedLinks[index];
-            return ListTile(
-              leading: Icon(link.isPassword ? Icons.lock : Icons.link),
-              title: Text(link.title),
-              subtitle: Text(link.isPassword ? '••••••••' : link.url),
-              trailing: Row(
+  Widget _buildMetadataFooter() {
+    return Wrap(
+      spacing: 8,
+      runSpacing: 4,
+      children: [
+        // Connected links indicators
+        if (infoItem.connectedLinks.isNotEmpty)
+          ...infoItem.connectedLinks.take(2).map((link) {
+            return Container(
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+              decoration: BoxDecoration(
+                color: Colors.blue.shade50,
+                borderRadius: BorderRadius.circular(4),
+                border: Border.all(color: Colors.blue.shade200),
+              ),
+              child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  IconButton(
-                    icon: const Icon(Icons.copy, size: 16),
-                    onPressed: () => _copyToClipboard(
-                      context, 
-                      link.isPassword ? link.url : link.title,
-                      link.isPassword ? 'Password' : 'Title'
-                    ),
+                  Icon(
+                    link.isPassword ? Icons.lock : Icons.link,
+                    size: 10,
+                    color: Colors.blue,
                   ),
-                  if (!link.isPassword)
-                    IconButton(
-                      icon: const Icon(Icons.open_in_new, size: 16),
-                      onPressed: () => _launchURL(context, link.url),
+                  const SizedBox(width: 2),
+                  Text(
+                    link.title,
+                    style: const TextStyle(
+                      fontSize: 10,
+                      color: Colors.blue,
+                      fontWeight: FontWeight.w500,
                     ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ],
               ),
             );
-          },
-        ),
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Close'),
-        ),
-      ],
-    ),
-  );
-}
+          }).toList(),
 
-Widget _buildMetadataFooter() {
-  return Wrap(
-    spacing: 8,
-    runSpacing: 4,
-    children: [
-      // Connected links indicators
-      if (infoItem.connectedLinks.isNotEmpty)
-        ...infoItem.connectedLinks.take(2).map((link) {
-          return Container(
+        // Show "+X more" if there are more than 2 links
+        if (infoItem.connectedLinks.length > 2)
+          Container(
             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
             decoration: BoxDecoration(
-              color: Colors.blue.shade50,
+              color: Colors.grey.shade200,
               borderRadius: BorderRadius.circular(4),
-              border: Border.all(color: Colors.blue.shade200),
             ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  link.isPassword ? Icons.lock : Icons.link,
-                  size: 10,
-                  color: Colors.blue,
-                ),
-                const SizedBox(width: 2),
-                Text(
-                  link.title,
-                  style: const TextStyle(
-                    fontSize: 10,
-                    color: Colors.blue,
-                    fontWeight: FontWeight.w500,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
-            ),
-          );
-        }).toList(),
-      
-      // Show "+X more" if there are more than 2 links
-      if (infoItem.connectedLinks.length > 2)
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-          decoration: BoxDecoration(
-            color: Colors.grey.shade200,
-            borderRadius: BorderRadius.circular(4),
-          ),
-          child: Text(
-            '+${infoItem.connectedLinks.length - 2} more',
-            style: TextStyle(
-              fontSize: 10,
-              color: Colors.grey.shade600,
-              fontWeight: FontWeight.w500,
+            child: Text(
+              '+${infoItem.connectedLinks.length - 2} more',
+              style: TextStyle(
+                fontSize: 10,
+                color: Colors.grey.shade600,
+                fontWeight: FontWeight.w500,
+              ),
             ),
           ),
+
+        // Last edited
+        Text(
+          'Edited ${_formatTimeAgo(infoItem.lastEdited)}',
+          style: TextStyle(fontSize: 10, color: Colors.grey.shade500),
         ),
-      
-      // Last edited
-      Text(
-        'Edited ${_formatTimeAgo(infoItem.lastEdited)}',
-        style: TextStyle(
-          fontSize: 10,
-          color: Colors.grey.shade500,
-        ),
-      ),
-    ],
-  );
-}
+      ],
+    );
+  }
+
   void _handleQuickAccess(BuildContext context, Link link) {
     if (link.isPassword) {
       // Show password dialog
@@ -315,15 +311,9 @@ Widget _buildMetadataFooter() {
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              _CopyableField(
-                label: 'Username',
-                value: link.title,
-              ),
+              _CopyableField(label: 'Username', value: link.title),
               const SizedBox(height: 12),
-              _CopyableField(
-                label: 'Password',
-                value: link.url,
-              ),
+              _CopyableField(label: 'Password', value: link.url),
             ],
           ),
           actions: [
@@ -367,12 +357,12 @@ Widget _buildMetadataFooter() {
   String _formatTimeAgo(DateTime dateTime) {
     final now = DateTime.now();
     final difference = now.difference(dateTime);
-    
+
     if (difference.inMinutes < 1) return 'Just now';
     if (difference.inMinutes < 60) return '${difference.inMinutes}m ago';
     if (difference.inHours < 24) return '${difference.inHours}h ago';
     if (difference.inDays < 7) return '${difference.inDays}d ago';
-    
+
     return '${dateTime.day}/${dateTime.month}/${dateTime.year}';
   }
 }

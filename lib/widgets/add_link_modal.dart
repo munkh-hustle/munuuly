@@ -37,7 +37,7 @@ class _AddLinkModalState extends State<AddLinkModal> {
   @override
   Widget build(BuildContext context) {
     final isEditing = widget.existingLink != null;
-    
+
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Column(
@@ -45,12 +45,13 @@ class _AddLinkModalState extends State<AddLinkModal> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            _isPassword ? (isEditing ? 'Edit Password' : 'Add New Password') 
-                       : (isEditing ? 'Edit Link' : 'Add New Link'),
+            _isPassword
+                ? (isEditing ? 'Edit Password' : 'Add New Password')
+                : (isEditing ? 'Edit Link' : 'Add New Link'),
             style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 16),
-          
+
           // Toggle between Link and Password
           Row(
             children: [
@@ -80,7 +81,7 @@ class _AddLinkModalState extends State<AddLinkModal> {
             ],
           ),
           const SizedBox(height: 16),
-          
+
           Form(
             key: _formKey,
             child: Column(
@@ -96,7 +97,9 @@ class _AddLinkModalState extends State<AddLinkModal> {
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return _isPassword ? 'Please enter username/email' : 'Please enter a title';
+                      return _isPassword
+                          ? 'Please enter username/email'
+                          : 'Please enter a title';
                     }
                     return null;
                   },
@@ -114,9 +117,13 @@ class _AddLinkModalState extends State<AddLinkModal> {
                   obscureText: _isPassword, // Hide password text
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return _isPassword ? 'Please enter password' : 'Please enter a URL';
+                      return _isPassword
+                          ? 'Please enter password'
+                          : 'Please enter a URL';
                     }
-                    if (!_isPassword && !value.startsWith('http://') && !value.startsWith('https://')) {
+                    if (!_isPassword &&
+                        !value.startsWith('http://') &&
+                        !value.startsWith('https://')) {
                       return 'Please enter a valid URL (include http:// or https://)';
                     }
                     return null;
@@ -166,9 +173,17 @@ class _AddLinkModalState extends State<AddLinkModal> {
   void _saveLink() {
     if (_formKey.currentState!.validate()) {
       if (widget.existingLink != null && widget.onLinkUpdated != null) {
-        widget.onLinkUpdated!(_titleController.text, _urlController.text, _isPassword);
+        widget.onLinkUpdated!(
+          _titleController.text,
+          _urlController.text,
+          _isPassword,
+        );
       } else {
-        widget.onLinkAdded(_titleController.text, _urlController.text, _isPassword);
+        widget.onLinkAdded(
+          _titleController.text,
+          _urlController.text,
+          _isPassword,
+        );
       }
       Navigator.of(context).pop();
     }

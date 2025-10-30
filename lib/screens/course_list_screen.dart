@@ -15,58 +15,55 @@ class CourseListScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text(
           'Folders',
-          style: TextStyle(
-            fontSize: 32,
-            fontWeight: FontWeight.bold,
-          ),
+          style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
         ),
         backgroundColor: Colors.transparent,
         elevation: 0,
         // Alternative sorting button in the app bar
-actions: [
-  Consumer<CourseProvider>(
-    builder: (context, courseProvider, child) {
-      return IconButton(
-        icon: const Icon(Icons.sort, color: Colors.black),
-        onPressed: () {
-          showDialog(
-            context: context,
-            builder: (context) => AlertDialog(
-              title: const Text('Sort Folders By'),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  ListTile(
-                    leading: const Icon(Icons.text_fields),
-                    title: const Text('Name'),
-                    trailing: courseProvider.sortBy == 'name'
-                        ? const Icon(Icons.check, color: Colors.green)
-                        : null,
-                    onTap: () {
-                      courseProvider.setSortBy('name');
-                      Navigator.of(context).pop();
-                    },
-                  ),
-                  ListTile(
-                    leading: const Icon(Icons.emoji_emotions),
-                    title: const Text('Emoji'),
-                    trailing: courseProvider.sortBy == 'emoji'
-                        ? const Icon(Icons.check, color: Colors.green)
-                        : null,
-                    onTap: () {
-                      courseProvider.setSortBy('emoji');
-                      Navigator.of(context).pop();
-                    },
-                  ),
-                ],
-              ),
-            ),
-          );
-        },
-      );
-    },
-  ),
-],
+        actions: [
+          Consumer<CourseProvider>(
+            builder: (context, courseProvider, child) {
+              return IconButton(
+                icon: const Icon(Icons.sort, color: Colors.black),
+                onPressed: () {
+                  showDialog(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      title: const Text('Sort Folders By'),
+                      content: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          ListTile(
+                            leading: const Icon(Icons.text_fields),
+                            title: const Text('Name'),
+                            trailing: courseProvider.sortBy == 'name'
+                                ? const Icon(Icons.check, color: Colors.green)
+                                : null,
+                            onTap: () {
+                              courseProvider.setSortBy('name');
+                              Navigator.of(context).pop();
+                            },
+                          ),
+                          ListTile(
+                            leading: const Icon(Icons.emoji_emotions),
+                            title: const Text('Emoji'),
+                            trailing: courseProvider.sortBy == 'emoji'
+                                ? const Icon(Icons.check, color: Colors.green)
+                                : null,
+                            onTap: () {
+                              courseProvider.setSortBy('emoji');
+                              Navigator.of(context).pop();
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              );
+            },
+          ),
+        ],
       ),
       body: Consumer<CourseProvider>(
         builder: (context, courseProvider, child) {
@@ -88,7 +85,8 @@ actions: [
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => CourseDetailScreen(courseId: course.id),
+                        builder: (context) =>
+                            CourseDetailScreen(courseId: course.id),
                       ),
                     );
                   },
@@ -102,9 +100,7 @@ actions: [
         onPressed: () {
           Navigator.push(
             context,
-            MaterialPageRoute(
-              builder: (context) => const EditCourseScreen(),
-            ),
+            MaterialPageRoute(builder: (context) => const EditCourseScreen()),
           );
         },
         backgroundColor: Colors.black,

@@ -4,8 +4,22 @@ import '../models/course.dart';
 import '../models/link.dart';
 
 class AddInfoModal extends StatefulWidget {
-  final Function(String title, String description, String emoji, List<Link> connectedLinks, List<String> tags)? onInfoAdded;
-  final Function(String title, String description, String emoji, List<Link> connectedLinks, List<String> tags)? onInfoUpdated;
+  final Function(
+    String title,
+    String description,
+    String emoji,
+    List<Link> connectedLinks,
+    List<String> tags,
+  )?
+  onInfoAdded;
+  final Function(
+    String title,
+    String description,
+    String emoji,
+    List<Link> connectedLinks,
+    List<String> tags,
+  )?
+  onInfoUpdated;
   final InfoItem? existingInfoItem;
   final List<Link> availableLinks;
 
@@ -40,7 +54,8 @@ class _AddInfoModalState extends State<AddInfoModal> {
       _titleController.text = widget.existingInfoItem!.title;
       _descriptionController.text = widget.existingInfoItem!.description;
       _selectedEmoji = widget.existingInfoItem!.emoji;
-      _emojiController.text = widget.existingInfoItem!.emoji; // Initialize emoji controller
+      _emojiController.text =
+          widget.existingInfoItem!.emoji; // Initialize emoji controller
       _selectedLinks = List.from(widget.existingInfoItem!.connectedLinks);
       _tags = List.from(widget.existingInfoItem!.tags);
     } else {
@@ -51,7 +66,7 @@ class _AddInfoModalState extends State<AddInfoModal> {
   @override
   Widget build(BuildContext context) {
     final isEditing = widget.existingInfoItem != null;
-    
+
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Column(
@@ -63,7 +78,7 @@ class _AddInfoModalState extends State<AddInfoModal> {
             style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 16),
-          
+
           Form(
             key: _formKey,
             child: Column(
@@ -98,7 +113,7 @@ class _AddInfoModalState extends State<AddInfoModal> {
                   ],
                 ),
                 const SizedBox(height: 16),
-                
+
                 // Rest of your existing form fields remain the same...
                 // Title Field
                 TextFormField(
@@ -115,7 +130,7 @@ class _AddInfoModalState extends State<AddInfoModal> {
                   },
                 ),
                 const SizedBox(height: 16),
-                
+
                 // Description Field
                 TextFormField(
                   controller: _descriptionController,
@@ -126,7 +141,7 @@ class _AddInfoModalState extends State<AddInfoModal> {
                   maxLines: 3,
                 ),
                 const SizedBox(height: 16),
-                
+
                 // Tags
                 TextFormField(
                   controller: _tagsController,
@@ -141,19 +156,23 @@ class _AddInfoModalState extends State<AddInfoModal> {
                   onFieldSubmitted: (_) => _addTag(),
                 ),
                 const SizedBox(height: 8),
-                
+
                 // Display tags
                 if (_tags.isNotEmpty) ...[
                   Wrap(
                     spacing: 8,
-                    children: _tags.map((tag) => Chip(
-                      label: Text(tag),
-                      onDeleted: () => _removeTag(tag),
-                    )).toList(),
+                    children: _tags
+                        .map(
+                          (tag) => Chip(
+                            label: Text(tag),
+                            onDeleted: () => _removeTag(tag),
+                          ),
+                        )
+                        .toList(),
                   ),
                   const SizedBox(height: 16),
                 ],
-                
+
                 // Multiple Links Connection
                 if (widget.availableLinks.isNotEmpty) ...[
                   const Text(
@@ -161,7 +180,7 @@ class _AddInfoModalState extends State<AddInfoModal> {
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 8),
-                  
+
                   Container(
                     decoration: BoxDecoration(
                       border: Border.all(color: Colors.grey.shade300),
@@ -173,14 +192,14 @@ class _AddInfoModalState extends State<AddInfoModal> {
                       itemCount: widget.availableLinks.length,
                       itemBuilder: (context, index) {
                         final link = widget.availableLinks[index];
-                        final isSelected = _selectedLinks.any((l) => l.id == link.id);
-                        
+                        final isSelected = _selectedLinks.any(
+                          (l) => l.id == link.id,
+                        );
+
                         return CheckboxListTile(
                           title: Text(
                             '${link.isPassword ? '🔐' : '🔗'} ${link.title}',
-                            style: TextStyle(
-                              fontSize: 14,
-                            ),
+                            style: TextStyle(fontSize: 14),
                           ),
                           subtitle: Text(
                             link.isPassword ? '••••••••' : link.url,
@@ -197,7 +216,9 @@ class _AddInfoModalState extends State<AddInfoModal> {
                               if (selected == true) {
                                 _selectedLinks.add(link);
                               } else {
-                                _selectedLinks.removeWhere((l) => l.id == link.id);
+                                _selectedLinks.removeWhere(
+                                  (l) => l.id == link.id,
+                                );
                               }
                             });
                           },
@@ -207,7 +228,7 @@ class _AddInfoModalState extends State<AddInfoModal> {
                       },
                     ),
                   ),
-                  
+
                   // Selected links summary
                   if (_selectedLinks.isNotEmpty) ...[
                     const SizedBox(height: 8),
@@ -224,7 +245,7 @@ class _AddInfoModalState extends State<AddInfoModal> {
               ],
             ),
           ),
-          
+
           // Action Buttons
           Row(
             children: [
