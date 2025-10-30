@@ -21,13 +21,16 @@ class AddInfoModal extends StatefulWidget {
   State<AddInfoModal> createState() => _AddInfoModalState();
 }
 
+// In add_info_modal.dart - replace the _showEmojiPicker method and related code
+
 class _AddInfoModalState extends State<AddInfoModal> {
   final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
   final _tagsController = TextEditingController();
+  final _emojiController = TextEditingController(); // Add this controller
   String _selectedEmoji = '📝';
-  List<Link> _selectedLinks = []; // Changed from single Link to List
+  List<Link> _selectedLinks = [];
   List<String> _tags = [];
 
   @override
@@ -37,8 +40,11 @@ class _AddInfoModalState extends State<AddInfoModal> {
       _titleController.text = widget.existingInfoItem!.title;
       _descriptionController.text = widget.existingInfoItem!.description;
       _selectedEmoji = widget.existingInfoItem!.emoji;
-      _selectedLinks = List.from(widget.existingInfoItem!.connectedLinks); // Updated
+      _emojiController.text = widget.existingInfoItem!.emoji; // Initialize emoji controller
+      _selectedLinks = List.from(widget.existingInfoItem!.connectedLinks);
       _tags = List.from(widget.existingInfoItem!.tags);
+    } else {
+      _emojiController.text = _selectedEmoji; // Initialize with default emoji
     }
   }
 
@@ -62,32 +68,38 @@ class _AddInfoModalState extends State<AddInfoModal> {
             key: _formKey,
             child: Column(
               children: [
-                // Emoji Selection
+                // Emoji Selection - Updated to use TextField
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Text('Emoji'),
                     const SizedBox(height: 4),
-                    GestureDetector(
-                      onTap: _showEmojiPicker,
-                      child: Container(
-                        height: 50,
-                        decoration: BoxDecoration(
-                          border: Border.all(color: Colors.grey.shade300),
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        child: Center(
-                          child: Text(
-                            _selectedEmoji,
-                            style: const TextStyle(fontSize: 20),
-                          ),
-                        ),
+                    TextField(
+                      controller: _emojiController,
+                      decoration: const InputDecoration(
+                        hintText: 'Tap to enter emoji...',
+                        border: OutlineInputBorder(),
+                      ),
+                      onChanged: (value) {
+                        setState(() {
+                          _selectedEmoji = value.isNotEmpty ? value : '📝';
+                        });
+                      },
+                      maxLength: 2, // Limit to 1-2 characters for emoji
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Tip: Tap the field to open emoji keyboard',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey.shade600,
                       ),
                     ),
                   ],
                 ),
                 const SizedBox(height: 16),
                 
+                // Rest of your existing form fields remain the same...
                 // Title Field
                 TextFormField(
                   controller: _titleController,
@@ -251,6 +263,8 @@ class _AddInfoModalState extends State<AddInfoModal> {
     );
   }
 
+  // Remove the old _showEmojiPicker method and _commonEmojis list
+
   void _addTag() {
     final tag = _tagsController.text.trim();
     if (tag.isNotEmpty && !_tags.contains(tag)) {
@@ -273,16 +287,16 @@ class _AddInfoModalState extends State<AddInfoModal> {
         widget.onInfoUpdated!(
           _titleController.text,
           _descriptionController.text,
-          _selectedEmoji,
-          _selectedLinks, // Updated parameter
+          _selectedEmoji, // This will now use the emoji from the text field
+          _selectedLinks,
           _tags,
         );
       } else if (widget.onInfoAdded != null) {
         widget.onInfoAdded!(
           _titleController.text,
           _descriptionController.text,
-          _selectedEmoji,
-          _selectedLinks, // Updated parameter
+          _selectedEmoji, // This will now use the emoji from the text field
+          _selectedLinks,
           _tags,
         );
       }
@@ -290,53 +304,9 @@ class _AddInfoModalState extends State<AddInfoModal> {
     }
   }
 
-  void _showEmojiPicker() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Choose Emoji'),
-        content: SizedBox(
-          width: double.maxFinite,
-          child: GridView.builder(
-            shrinkWrap: true,
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 6,
-              crossAxisSpacing: 8,
-              mainAxisSpacing: 8,
-            ),
-            itemCount: _commonEmojis.length,
-            itemBuilder: (context, index) {
-              return GestureDetector(
-                onTap: () {
-                  setState(() {
-                    _selectedEmoji = _commonEmojis[index];
-                  });
-                  Navigator.of(context).pop();
-                },
-                child: Container(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(8),
-                    color: Colors.grey.shade100,
-                  ),
-                  child: Center(
-                    child: Text(
-                      _commonEmojis[index],
-                      style: const TextStyle(fontSize: 20),
-                    ),
-                  ),
-                ),
-              );
-            },
-          ),
-        ),
-      ),
-    );
+  @override
+  void dispose() {
+    _emojiController.dispose(); // Don't forget to dispose the controller
+    super.dispose();
   }
-
-  final List<String> _commonEmojis = [
-    '📝', '📚', '📖', '🎯', '⏰', '📅',
-    '🔗', '🔐', '📎', '📋', '📁', '📂',
-    '💡', '⭐', '🎓', '📊', '📈', '📉',
-    '🔄', '✅', '❌', '⚠️', '🔔', '🎉',
-  ];
 }
