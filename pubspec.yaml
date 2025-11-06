@@ -2,7 +2,7 @@ name: munuuly
 description: "A new Flutter project."
 publish_to: 'none'
 
-version: 1.0.1
+version: 1.0.2
 
 environment:
   sdk: ^3.9.2
@@ -11,7 +11,11 @@ dependencies:
   flutter:
     sdk: flutter
   provider: ^6.0.5
+  shared_preferences: ^2.5.3
   url_launcher: ^6.1.11
+  image_picker: ^1.1.2
+  path_provider: ^2.1.1
+  path: ^1.8.3
 
 dev_dependencies:
   flutter_test:

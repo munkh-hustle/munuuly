@@ -13,7 +13,8 @@ class Course {
   DateTime? deadline;
   String? description;
   List<Link> links;
-  List<InfoItem> infoItems; // New field for info items
+  List<InfoItem> infoItems;
+  List<Photo>? photos; // New field for photos
 
   Course({
     required this.id,
@@ -28,8 +29,10 @@ class Course {
     this.description,
     List<Link>? links,
     List<InfoItem>? infoItems,
+    List<Photo>? photos,
   }) : links = links ?? [],
-       infoItems = infoItems ?? [];
+       infoItems = infoItems ?? [],
+       photos = photos ?? [];
 
   String get initials => name.isNotEmpty ? name[0].toUpperCase() : '';
 
@@ -46,6 +49,7 @@ class Course {
     String? description,
     List<Link>? links,
     List<InfoItem>? infoItems,
+    List<Photo>? photos,
   }) {
     return Course(
       id: id ?? this.id,
@@ -60,11 +64,11 @@ class Course {
       description: description ?? this.description,
       links: links ?? this.links,
       infoItems: infoItems ?? this.infoItems,
+      photos: photos ?? this.photos,
     );
   }
 }
 
-// In course.dart - updated InfoItem model
 class InfoItem {
   String id;
   String title;
@@ -72,7 +76,7 @@ class InfoItem {
   String emoji;
   DateTime createdAt;
   DateTime lastEdited;
-  List<Link> connectedLinks; // Changed from single Link to List
+  List<Link> connectedLinks;
   List<String> tags;
 
   InfoItem({
@@ -82,7 +86,26 @@ class InfoItem {
     required this.emoji,
     required this.createdAt,
     required this.lastEdited,
-    List<Link>? connectedLinks, // Updated parameter
+    List<Link>? connectedLinks,
     this.tags = const [],
   }) : connectedLinks = connectedLinks ?? [];
+}
+
+// Add Photo model
+class Photo {
+  String id;
+  String title;
+  String description;
+  String imagePath; // Path to the image file
+  DateTime createdAt;
+  DateTime lastEdited;
+
+  Photo({
+    required this.id,
+    required this.title,
+    required this.description,
+    required this.imagePath,
+    required this.createdAt,
+    required this.lastEdited,
+  });
 }

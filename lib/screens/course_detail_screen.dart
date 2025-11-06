@@ -1,12 +1,16 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../providers/course_provider.dart';
 import '../widgets/add_link_modal.dart';
+import '../widgets/add_photo_modal.dart';
 import '../widgets/link_item.dart';
 import '../models/course.dart';
 import '../models/link.dart';
+import '../widgets/photo_item.dart';
 import 'edit_course_screen.dart';
 import '../widgets/add_info_modal.dart';
 import '../widgets/info_item_card.dart';
@@ -85,7 +89,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen>
                   controller: _tabController,
                   tabs: const [
                     Tab(text: 'Info'),
-                    Tab(text: 'Files'),
+                    Tab(text: 'Photos'),
                     Tab(text: 'Sets'),
                     Tab(text: 'Links'),
                   ],
@@ -98,9 +102,178 @@ class _CourseDetailScreenState extends State<CourseDetailScreen>
           controller: _tabController,
           children: [
             _buildTodoTab(course),
-            _buildFilesTab(),
+            _buildPhotosTab(course),
             _buildStudySetsTab(),
             _buildLinksTab(course),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPhotosTab(Course course) {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        children: [
+          // Add Photo Button
+          Align(
+            alignment: Alignment.centerRight,
+            child: ElevatedButton(
+              onPressed: () {
+                showModalBottomSheet(
+                  context: context,
+                  isScrollControlled: true,
+                  builder: (context) => AddPhotoModal(
+                    onPhotoAdded: (title, description, imagePath) {
+                      final courseProvider = Provider.of<CourseProvider>(
+                        context,
+                        listen: false,
+                      );
+                      courseProvider.addPhotoToCourse(
+                        course.id,
+                        Photo(
+                          id: DateTime.now().millisecondsSinceEpoch.toString(),
+                          title: title,
+                          description: description,
+                          imagePath: imagePath,
+                          createdAt: DateTime.now(),
+                          lastEdited: DateTime.now(),
+                        ),
+                      );
+                    },
+                  ),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.black,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 12,
+                ),
+              ),
+              child: const Text('+ Photo'),
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          // Photos List
+          Expanded(
+            child: (course.photos?.isEmpty ?? true)
+                ? const Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.photo_library, size: 64, color: Colors.grey),
+                        SizedBox(height: 16),
+                        Text(
+                          'No photos yet',
+                          style: TextStyle(color: Colors.grey, fontSize: 16),
+                        ),
+                        Text(
+                          'Add photos from your gallery',
+                          style: TextStyle(color: Colors.grey, fontSize: 12),
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
+                    ),
+                  )
+                : ListView.builder(
+                    itemCount: course.photos!.length,
+                    itemBuilder: (context, index) {
+                      final photo = course.photos![index];
+                      return PhotoItem(
+                        photo: photo,
+                        onTap: () => _showPhotoDetail(context, photo),
+                        onDelete: () {
+                          Provider.of<CourseProvider>(
+                            context,
+                            listen: false,
+                          ).removePhotoFromCourse(course.id, photo.id);
+                        },
+                        onEdit: () {
+                          showModalBottomSheet(
+                            context: context,
+                            isScrollControlled: true,
+                            builder: (context) => AddPhotoModal(
+                              existingPhoto: photo,
+                              onPhotoUpdated: (title, description, imagePath) {
+                                final courseProvider =
+                                    Provider.of<CourseProvider>(
+                                      context,
+                                      listen: false,
+                                    );
+                                final updatedPhoto = Photo(
+                                  id: photo.id,
+                                  title: title,
+                                  description: description,
+                                  imagePath: imagePath,
+                                  createdAt: photo.createdAt,
+                                  lastEdited: DateTime.now(),
+                                );
+                                courseProvider.updatePhotoInCourse(
+                                  course.id,
+                                  photo.id,
+                                  updatedPhoto,
+                                );
+                              },
+                              onPhotoAdded:
+                                  (
+                                    title,
+                                    description,
+                                    imagePath,
+                                  ) {}, // Not used in edit mode
+                            ),
+                          );
+                        },
+                      );
+                    },
+                  ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showPhotoDetail(BuildContext context, Photo photo) {
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      photo.title,
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: () => Navigator.of(context).pop(),
+                  ),
+                ],
+              ),
+            ),
+            Image.file(
+              File(photo.imagePath),
+              width: double.infinity,
+              fit: BoxFit.contain,
+            ),
+            if (photo.description.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Text(photo.description),
+              ),
+            const SizedBox(height: 16),
           ],
         ),
       ),
@@ -541,7 +714,6 @@ class _CourseDetailScreenState extends State<CourseDetailScreen>
     return '${dateTime.day}/${dateTime.month}/${dateTime.year} ${dateTime.hour}:${dateTime.minute.toString().padLeft(2, '0')}';
   }
 
-  Widget _buildFilesTab() => const Center(child: Text('Files Content'));
   Widget _buildStudySetsTab() =>
       const Center(child: Text('Study Sets Content'));
 
