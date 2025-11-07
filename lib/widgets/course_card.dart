@@ -1,3 +1,4 @@
+// lib\widgets\course_card.dart
 import 'package:flutter/material.dart';
 import '../models/course.dart';
 

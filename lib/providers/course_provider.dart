@@ -1,4 +1,4 @@
-// course_provider.dart
+// lib\providers\course_provider.dart
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';

@@ -34,8 +34,6 @@ class MyApp extends StatelessWidget {
         title: 'Course Manager',
         theme: ThemeData(
           primarySwatch: Colors.blue,
-          // Remove or comment out the custom font for now
-          // fontFamily: 'YourCustomFont',
         ),
         home: const CourseListScreen(),
         debugShowCheckedModeBanner: false,

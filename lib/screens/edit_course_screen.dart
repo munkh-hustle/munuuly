@@ -1,3 +1,4 @@
+// lib/screens/edit_course_screen.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/course.dart';

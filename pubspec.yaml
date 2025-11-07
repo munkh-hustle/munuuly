@@ -2,7 +2,7 @@ name: munuuly
 description: "A new Flutter project."
 publish_to: 'none'
 
-version: 1.0.2
+version: 1.0.3
 
 environment:
   sdk: ^3.9.2
@@ -21,7 +21,7 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^6.0.0
-  flutter_launcher_icons: ^0.13.1  # Add this line
+  flutter_launcher_icons: ^0.14.4  # Add this line
 
 flutter:
   uses-material-design: true

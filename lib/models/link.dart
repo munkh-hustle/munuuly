@@ -4,13 +4,13 @@ class Link {
   String title;
   String url;
   DateTime createdAt;
-  bool isPassword; // New field to distinguish between link and password
+  bool isPassword; 
 
   Link({
     required this.id,
     required this.title,
     required this.url,
     required this.createdAt,
-    this.isPassword = false, // Default to false (regular link)
+    this.isPassword = false, 
   });
 }

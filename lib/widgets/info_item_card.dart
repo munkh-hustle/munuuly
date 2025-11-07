@@ -1,4 +1,4 @@
-// Updated info_item_card.dart
+// lib\widgets\info_item_card.dart
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter/services.dart';
@@ -272,7 +272,7 @@ class InfoItemCard extends StatelessWidget {
                 ],
               ),
             );
-          }).toList(),
+          }),
 
         // Show "+X more" if there are more than 2 links
         if (infoItem.connectedLinks.length > 2)

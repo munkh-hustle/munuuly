@@ -1,5 +1,5 @@
+// lib\screens\course_detail_screen.dart
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -321,7 +321,6 @@ class _CourseDetailScreenState extends State<CourseDetailScreen>
     );
   }
 
-  // In the _buildLinksTab method of course_detail_screen.dart
   Widget _buildLinksTab(Course course) {
     return Padding(
       padding: const EdgeInsets.all(16.0),
@@ -426,9 +425,6 @@ class _CourseDetailScreenState extends State<CourseDetailScreen>
     );
   }
 
-  // Replace the _buildTodoTab() method in course_detail_screen.dart
-  // In course_detail_screen.dart - update the _buildTodoTab method
-  // In course_detail_screen.dart - update the _buildTodoTab method
   Widget _buildTodoTab(Course course) {
     return Padding(
       padding: const EdgeInsets.all(16.0),
@@ -647,7 +643,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen>
                       ],
                     ),
                   );
-                }).toList(),
+                }),
                 const SizedBox(height: 16),
               ],
 

@@ -14,7 +14,7 @@ class Course {
   String? description;
   List<Link> links;
   List<InfoItem> infoItems;
-  List<Photo>? photos; // New field for photos
+  List<Photo>? photos; 
 
   Course({
     required this.id,
@@ -91,12 +91,11 @@ class InfoItem {
   }) : connectedLinks = connectedLinks ?? [];
 }
 
-// Add Photo model
 class Photo {
   String id;
   String title;
   String description;
-  String imagePath; // Path to the image file
+  String imagePath; 
   DateTime createdAt;
   DateTime lastEdited;
 
