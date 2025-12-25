@@ -1,4 +1,4 @@
-// link.dart
+// lib\models\link.dart
 class Link {
   String id;
   String title;

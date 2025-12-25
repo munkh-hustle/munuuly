@@ -1,18 +1,4 @@
-// lib/
-// ├── models/
-// │   ├── course.dart
-// │   └── link.dart
-// ├── providers/
-// │   └── course_provider.dart
-// ├── screens/
-// │   ├── course_list_screen.dart
-// │   ├── edit_course_screen.dart
-// │   └── course_detail_screen.dart
-// ├── widgets/
-// │   ├── course_card.dart
-// │   ├── link_item.dart
-// │   └── add_link_modal.dart
-// └── main.dart
+
 // lib\main.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';

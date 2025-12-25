@@ -1,4 +1,4 @@
-// course.dart
+// lib\models\course.dart
 import 'link.dart';
 
 class Course {
