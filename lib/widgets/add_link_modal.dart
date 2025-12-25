@@ -5,7 +5,7 @@ import '../models/link.dart';
 class AddLinkModal extends StatefulWidget {
   final Function(String title, String url, bool isPassword) onLinkAdded;
   final Function(String title, String url, bool isPassword)? onLinkUpdated;
-  final Link? existingLink;
+  final CourseLink? existingLink;
 
   const AddLinkModal({
     super.key,

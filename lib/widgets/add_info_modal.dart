@@ -8,7 +8,7 @@ class AddInfoModal extends StatefulWidget {
     String title,
     String description,
     String emoji,
-    List<Link> connectedLinks,
+    List<CourseLink> connectedLinks,
     List<String> tags,
   )?
   onInfoAdded;
@@ -16,12 +16,12 @@ class AddInfoModal extends StatefulWidget {
     String title,
     String description,
     String emoji,
-    List<Link> connectedLinks,
+    List<CourseLink> connectedLinks,
     List<String> tags,
   )?
   onInfoUpdated;
   final InfoItem? existingInfoItem;
-  final List<Link> availableLinks;
+  final List<CourseLink> availableLinks;
 
   const AddInfoModal({
     super.key,
@@ -44,7 +44,7 @@ class _AddInfoModalState extends State<AddInfoModal> {
   final _tagsController = TextEditingController();
   final _emojiController = TextEditingController(); // Add this controller
   String _selectedEmoji = '📝';
-  List<Link> _selectedLinks = [];
+  List<CourseLink> _selectedLinks = [];
   List<String> _tags = [];
 
   @override

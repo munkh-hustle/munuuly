@@ -12,7 +12,7 @@ class Course {
   DateTime? lastEdited;
   DateTime? deadline;
   String? description;
-  List<Link> links;
+  List<CourseLink> links;
   List<InfoItem> infoItems;
   List<Photo>? photos; 
 
@@ -27,7 +27,7 @@ class Course {
     this.lastEdited,
     this.deadline,
     this.description,
-    List<Link>? links,
+    List<CourseLink>? links,
     List<InfoItem>? infoItems,
     List<Photo>? photos,
   }) : links = links ?? [],
@@ -47,7 +47,7 @@ class Course {
     DateTime? lastEdited,
     DateTime? deadline,
     String? description,
-    List<Link>? links,
+    List<CourseLink>? links,
     List<InfoItem>? infoItems,
     List<Photo>? photos,
   }) {
@@ -76,7 +76,7 @@ class InfoItem {
   String emoji;
   DateTime createdAt;
   DateTime lastEdited;
-  List<Link> connectedLinks;
+  List<CourseLink> connectedLinks;
   List<String> tags;
 
   InfoItem({
@@ -86,7 +86,7 @@ class InfoItem {
     required this.emoji,
     required this.createdAt,
     required this.lastEdited,
-    List<Link>? connectedLinks,
+    List<CourseLink>? connectedLinks,
     this.tags = const [],
   }) : connectedLinks = connectedLinks ?? [];
 }

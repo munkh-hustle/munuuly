@@ -301,7 +301,7 @@ class InfoItemCard extends StatelessWidget {
     );
   }
 
-  void _handleQuickAccess(BuildContext context, Link link) {
+  void _handleQuickAccess(BuildContext context, CourseLink link) {
     if (link.isPassword) {
       // Show password dialog
       showDialog(

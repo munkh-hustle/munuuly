@@ -109,7 +109,7 @@ class CourseProvider with ChangeNotifier {
           ? DateTime.parse(map['deadline'])
           : null,
       description: map['description'],
-      links: List<Link>.from(
+      links: List<CourseLink>.from(
         map['links']?.map((linkMap) => _linkFromMap(linkMap)) ?? [],
       ),
       infoItems: List<InfoItem>.from(
@@ -121,7 +121,7 @@ class CourseProvider with ChangeNotifier {
     );
   }
 
-  Map<String, dynamic> _linkToMap(Link link) {
+  Map<String, dynamic> _linkToMap(CourseLink link) {
     return {
       'id': link.id,
       'title': link.title,
@@ -131,8 +131,8 @@ class CourseProvider with ChangeNotifier {
     };
   }
 
-  Link _linkFromMap(Map<String, dynamic> map) {
-    return Link(
+  CourseLink _linkFromMap(Map<String, dynamic> map) {
+    return CourseLink(
       id: map['id'],
       title: map['title'],
       url: map['url'],
@@ -164,7 +164,7 @@ class CourseProvider with ChangeNotifier {
       emoji: map['emoji'],
       createdAt: DateTime.parse(map['createdAt']),
       lastEdited: DateTime.parse(map['lastEdited']),
-      connectedLinks: List<Link>.from(
+      connectedLinks: List<CourseLink>.from(
         map['connectedLinks']?.map((linkMap) => _linkFromMap(linkMap)) ?? [],
       ),
       tags: List<String>.from(map['tags'] ?? []),
@@ -228,7 +228,7 @@ class CourseProvider with ChangeNotifier {
     }
   }
 
-  void addLinkToCourse(String courseId, Link link) {
+  void addLinkToCourse(String courseId, CourseLink link) {
     final course = getCourseById(courseId);
     if (course != null) {
       final updatedCourse = course.copyWith(links: [...course.links, link]);
@@ -295,7 +295,7 @@ class CourseProvider with ChangeNotifier {
 
     final updatedLinks = course.links.map((link) {
       if (link.id == linkId) {
-        return Link(
+        return CourseLink(
           id: link.id,
           title: newTitle,
           url: newUrl,
@@ -311,8 +311,8 @@ class CourseProvider with ChangeNotifier {
         (link) => link.id == linkId,
       );
       if (linkIndex != -1) {
-        final updatedConnectedLinks = List<Link>.from(infoItem.connectedLinks);
-        updatedConnectedLinks[linkIndex] = Link(
+        final updatedConnectedLinks = List<CourseLink>.from(infoItem.connectedLinks);
+        updatedConnectedLinks[linkIndex] = CourseLink(
           id: linkId,
           title: newTitle,
           url: newUrl,
@@ -436,5 +436,19 @@ class CourseProvider with ChangeNotifier {
       );
       updateCourse(courseId, updatedCourse);
     }
+  }
+
+  // Add to CourseProvider class
+  void clearAllData() async {
+    _courses.clear();
+    await _saveData();
+    notifyListeners();
+  }
+
+  void setCourses(List<Course> newCourses) {
+    _courses.clear();
+    _courses.addAll(newCourses);
+    _saveData();
+    notifyListeners();
   }
 }

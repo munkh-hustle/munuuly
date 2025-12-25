@@ -5,9 +5,9 @@ import '../models/link.dart';
 import 'package:flutter/services.dart'; // For Clipboard
 
 class LinkItem extends StatelessWidget {
-  final Link link;
+  final CourseLink link;
   final VoidCallback onDelete;
-  final Function(Link) onEdit;
+  final Function(CourseLink) onEdit;
 
   const LinkItem({
     super.key,

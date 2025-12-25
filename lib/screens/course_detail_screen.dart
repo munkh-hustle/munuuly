@@ -342,7 +342,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen>
                       );
                       courseProvider.addLinkToCourse(
                         course.id,
-                        Link(
+                        CourseLink(
                           id: DateTime.now().millisecondsSinceEpoch.toString(),
                           title: title,
                           url: url,

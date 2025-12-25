@@ -1,12 +1,12 @@
-// lib\models\link.dart
-class Link {
+// lib/models/link.dart
+class CourseLink {
   String id;
   String title;
   String url;
   DateTime createdAt;
   bool isPassword; 
 
-  Link({
+  CourseLink({
     required this.id,
     required this.title,
     required this.url,
